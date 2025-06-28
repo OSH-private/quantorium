@@ -1,8 +1,18 @@
 <script>
 import {router} from "../router/index.js";
 
+
 export default {
+
+
+
   methods: {
+
+    unlockFourthPage() {
+      localStorage.setItem('btn1Pressed', 'true');
+      checkAllButtons();
+    },
+
     Perehod2() {
       router.push({path: '/quest1'});
     },
@@ -40,7 +50,8 @@ export default {
       <div>
         <button class="bot1" style="margin-top: 5vw" @click="Perehod5">
           ФИНАЛ
-          </button>/
+        </button>
+        /
       </div>
     </div>
   </div>

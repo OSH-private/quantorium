@@ -5,6 +5,7 @@ import Pg2 from "../pages/Pg2.vue";
 import Pg3 from "../pages/Pg3.vue";
 import Pg4 from "../pages/Pg4.vue";
 import Pg5 from "../pages/Pg5.vue";
+import Secret from "../pages/Secret.vue";
 const routes =
     [
         {
@@ -29,8 +30,13 @@ const routes =
         },
         {
             path: '/final',
-            component: Pg5
-        }
+            component: Pg5,
+        },
+
+        { path: '/secret', component: Secret, meta: { requiresUnlock: true } }
+
+
+
     ]
 export const router=createRouter({
     history:createWebHistory(),

@@ -20,6 +20,9 @@ export default {
         тут типа будет головоломка
       </p>
       <div class="div2">
+        <button class="fnbt1" onclick="unlockFourthPage()">
+          кнопка для финала
+        </button>
         <button class="bot1" @click="Perehod1">
           Переход на roadmap
         </button>
@@ -29,9 +32,6 @@ export default {
 </template>
 
 <style scoped>
-body {
-  background-color: #2c2f66;
-}
 
 .div1 {
   width: 100vw;
@@ -41,21 +41,31 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: rgb(44, 47, 102);
+  background: #0b0b38;
+  background: linear-gradient(0deg, rgb(0, 0, 0) 0%, rgb(63, 85, 179) 53%, rgb(0, 0, 0) 100%);
+}
+
+.fnbt1 {
+  font-size: 4vw;
+  height: 10vw;
+  width: 50vw;
+  background-color: rgb(255, 189, 41);
 }
 
 .bot1 {
+  color: white;
+  margin-top: 1vw;
   font-size: 4vw;
-  height: 20vw;
+  height: 10vw;
   width: 50vw;
-  background-color: rgb(230, 210, 170);
+  background-color: rgb(70, 125, 190);
 }
-
 .div2 {
   font-size: 40vw;
   margin-top: 5vw;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
 }
 </style>
