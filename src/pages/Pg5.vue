@@ -3,7 +3,6 @@ import {router} from "../router/index.js";
 
 export default {
   created() {
-    console.log("пиздец.");
   },
   methods: {
     Perehod1() {

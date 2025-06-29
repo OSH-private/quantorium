@@ -1,11 +1,11 @@
 import {createWebHistory,createRouter} from "vue-router";
 import Home from "../pages/Home.vue";
-import Pg1 from "../pages/Pg1.vue";
+import Pg1 from "../pages/Zavod.vue";
 import Pg2 from "../pages/Pg2.vue";
 import Pg3 from "../pages/Pg3.vue";
 import Pg4 from "../pages/Pg4.vue";
 import Pg5 from "../pages/Pg5.vue";
-import Secret from "../pages/Secret.vue";
+import comic from "../pages/comic.vue";
 const routes =
     [
         {
@@ -32,9 +32,10 @@ const routes =
             path: '/final',
             component: Pg5,
         },
-
-        { path: '/secret', component: Secret, meta: { requiresUnlock: true } }
-
+        {
+            path: '/comic',
+            component: comic,
+        }
 
 
     ]
