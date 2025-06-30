@@ -5,9 +5,12 @@ export default {
   data() {
     return {
       dialogue: [
-        "Привет! Я помогу тебе выбрать квест.",
-        "Нажми на любую кнопку ниже, чтобы начать приключение.",
-        "На самом деле я гей, а ты ебись тут как хочешь!"
+        "В этом цеху разъебало все провода",
+        "...",
+        "эээээ...",
+        "...",
+        "На самом деле они были порваны ещё до молнии, просто наши електрики в запое и мы не можем до них достучаться",
+        "Но тебе в любом случае чинить всю эту хуйню, так что удачи долбаёб!"
       ],
       dialogueIndex: 0,
       typedText: "",
@@ -70,47 +73,51 @@ export default {
       }
     },
 
-    Perehod2() {
-      router.push({ path: '/quest1' });
+    Perehod1() {
+      router.push({ path: '/roadmap' });
     },
-    Perehod3() {
-      router.push({ path: '/quest2' });
+    PerehodP1() {
+      router.push({ path: '/P1' });
     },
-    PerehodG() {
-      router.push({ path: '/garage' });
+    PerehodP2() {
+      router.push({ path: '/P2' });
     },
-    Perehod5() {
-      router.push({ path: '/final' });
+    PerehodP3() {
+      router.push({ path: '/P3' });
+    },
+    PerehodP4() {
+      router.push({ path: '/P4' });
     }
   }
 };
 </script>
 
 <template>
-    <div class="div1" @click="advanceDialogue">
-      <p class="title">Выбери квест</p>
+  <div class="div1" @click="advanceDialogue">
+    <p class="title">ебучие провода</p>
 
-      <!-- Диалоговый блок -->
-      <div v-if="showCharacter" class="dialogue-container" :class="{ exit: isExiting }">
-        <div class="dialogue-box">
-          <p>{{ typedText }}</p>
-        </div>
-        <img class="character-image" src="../assets/pers.png" alt="Персонаж" />
+    <!-- Диалоговый блок -->
+    <div v-if="showCharacter" class="dialogue-container" :class="{ exit: isExiting }">
+      <div class="dialogue-box">
+        <p>{{ typedText }}</p>
       </div>
-
-      <!-- Кнопки -->
-      <div class="button-row">
-        <button class="bot1" @click.stop="Perehod2">квест 1</button>
-        <button class="bot1" @click.stop="Perehod3">квест 2</button>
-        <button class="bot1" @click.stop="PerehodG">квест 3</button>
-        <button class="bot1" @click.stop="Perehod5">ФИНАЛ</button>
-      </div>
+      <img class="character-image" src="../assets/pers.png" alt="Персонаж" />
     </div>
+
+    <!-- Кнопки -->
+    <div class="button-row">
+      <button class="bot1" @click.stop="PerehodP1">ПРОВОДА1</button>
+      <button class="bot1" @click.stop="PerehodP2">ПРОВОДА2</button>
+      <button class="bot1" @click.stop="PerehodP3">ПРОВОДА3</button>
+      <button class="bot1" @click.stop="PerehodP4">ПРОВОДА4</button>
+      <button class="bot1" @click.stop="Perehod1">НУ НАХУЙ</button>
+    </div>
+  </div>
 </template>
 
 <style scoped>
 .dialogue-container {
-  position: absolute;
+  position: relative;
   bottom: 0vh;
   left: 0;
   width: 100%;
@@ -118,8 +125,7 @@ export default {
   display: flex;
   z-index: 30;
   pointer-events: none;
-  transition: transform 1s ease, opacity 1s ease;
-  position: relative; /* для абсолютного позиционирования персонажа */
+  transition: transform 1s ease, opacity 1s ease; /* для абсолютного позиционирования персонажа */
 }
 
 .dialogue-box {
@@ -183,7 +189,7 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background-image: url('../assets/background.png');
+  background-image: url('../assets/ceh.png');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
@@ -192,7 +198,7 @@ export default {
 
 .title {
   font-size: 6vw;
-  color: #000000;
+  color: #ffffff;
   text-align: center;
 }
 </style>
