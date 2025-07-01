@@ -18,7 +18,7 @@ export default {
       </p>
       <div class="div2">
         <button class="bot1" @click="Perehod3">
-          я всё сделал дайте выйти
+          выйти
         </button>
       </div>
     </div>
@@ -43,7 +43,7 @@ export default {
 .bot1 {
   color: white;
   margin-top: 1vw;
-  font-size: 2vw;
+  font-size: 5vw;
   height: 7vw;
   width: 20vw;
   border-radius: 25px;

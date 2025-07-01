@@ -74,8 +74,7 @@ export default {
   align-items: center;
   justify-content: center;
   border: 2px solid #333;
-  border-radius: 10px;
-  background-color: #fff;
+  background-color: #7e7e7e;
   animation: fadeIn 0.4s ease-in-out;
   overflow: hidden;
 }
@@ -85,7 +84,7 @@ export default {
   height: auto;
   object-fit: cover;
   max-height: 100%;
-  border-radius: 8px;
+
 }
 
 /* Расположение по углам */

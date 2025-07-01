@@ -5,12 +5,12 @@ export default {
   data() {
     return {
       dialogue: [
-        "В этом цеху разъебало все провода",
-        "...",
-        "эээээ...",
-        "...",
-        "На самом деле они были порваны ещё до молнии, просто наши електрики в запое и мы не можем до них достучаться",
-        "Но тебе в любом случае чинить всю эту хуйню, так что удачи долбаёб!"
+        "В этом цеху от перенапряжения отсоеденились провода.",
+        "Без соединённых проводов не будет работать электричество и оборудование.",
+        "Прийдется нам это исправить.",
+        "Обычно такие вещи делают только поготовленные специалисты.",
+        "Но у тебя есть я, так что думаю мы справимся!",
+        "Просто соблюдай все условия соединения, написанные снизу и будь аккуратен!"
       ],
       dialogueIndex: 0,
       typedText: "",
@@ -94,7 +94,7 @@ export default {
 
 <template>
   <div class="div1" @click="advanceDialogue">
-    <p class="title">ебучие провода</p>
+    <p class="title">провода</p>
 
     <!-- Диалоговый блок -->
     <div v-if="showCharacter" class="dialogue-container" :class="{ exit: isExiting }">
@@ -110,7 +110,7 @@ export default {
       <button class="bot1" @click.stop="PerehodP2">ПРОВОДА2</button>
       <button class="bot1" @click.stop="PerehodP3">ПРОВОДА3</button>
       <button class="bot1" @click.stop="PerehodP4">ПРОВОДА4</button>
-      <button class="bot1" @click.stop="Perehod1">НУ НАХУЙ</button>
+      <button class="bot1" @click.stop="Perehod1">НАЗАД</button>
     </div>
   </div>
 </template>

@@ -141,7 +141,7 @@ function execute(queue) {
   }
 
   if (x < 0 || y < 0 || x >= 10 || y >= 10) {
-    alert('КУДА ХУЯРИШЬ БЛЯ ТОРМОЗИ!')
+    alert('НАМ ЯВНО НЕ ТУДА!')
     reset()
     return
   }
@@ -149,7 +149,7 @@ function execute(queue) {
   const cell = baseMaze[y][x]
 
   if (cell === 1) {
-    alert('ПИЗДЕЦ ЯРИК ВОДИЛА')
+    alert('ЧТО ТО НЕ ТАК, ПОПРОБУЙ ЕЩЁ РАЗ')
     reset()
     return
   }
@@ -163,10 +163,10 @@ function execute(queue) {
 
   if (cell === 3) {
     if (passedCheckpoint.value) {
-      alert('ЗАЕБИСЬ')
+      alert('УРА, ТЫ ВСЁ СДЕЛАЛ ПРАВИЛЬНО!')
       Perehod1()
     } else {
-      alert('ТЫ ЧЕ ДАУН? А НЕ ЧЕ ТОЧНО НАДА СНАЧАЛА КОНТРОЛЬНУЮ ТОЧКУ ПРОЙТИ?')
+      alert('КАЖЕТСЯ МЫ ЗАБЫЛИ ЧТО ТО ВАЖНОЕ...')
       reset()
       return
     }
