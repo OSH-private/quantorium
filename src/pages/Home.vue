@@ -3,11 +3,43 @@ import { router } from "../router/index.js";
 
 export default {
   methods: {
-    Perehod1() {
-      router.push({ path: '/comic' });
+    async Perehod1() {
+      await this.goFullscreen();
+
+      // Инициализируем и запускаем музыку один раз
+      if (!window.audio) {
+        window.audio = new Audio("../../public/background.mp3");
+        window.audio.loop = true;
+        window.audio.volume = 0.5;
+
+        try {
+          await window.audio.play(); // запускаем звук
+        } catch (err) {
+          console.warn("Автовоспроизведение не удалось:", err);
+        }
+      }
+
+      router.push({ path: "/comic" });
+    },
+
+    goFullscreen() {
+      const el = document.documentElement;
+
+      if (el.requestFullscreen) {
+        return el.requestFullscreen();
+      } else if (el.webkitRequestFullscreen) {
+        return el.webkitRequestFullscreen();
+      } else if (el.mozRequestFullScreen) {
+        return el.mozRequestFullScreen();
+      } else if (el.msRequestFullscreen) {
+        return el.msRequestFullscreen();
+      } else {
+        console.warn("Fullscreen API не поддерживается");
+        return Promise.resolve();
+      }
     }
   }
-}
+};
 </script>
 
 <template>
@@ -54,5 +86,4 @@ export default {
   background-color: rgb(0, 0, 0);
   font-weight: 900;
 }
-
 </style>

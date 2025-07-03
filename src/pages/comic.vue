@@ -10,7 +10,14 @@ export default {
     return {
       currentFrame: 1,
       frames: [c1, c2, c3, c4],
+      initialVolume: 0.5, // 💡 здесь настраивается ИСХОДНАЯ громкость
+      volume: 0.5,         // будет установлена из initialVolume при запуске
     };
+  },
+  mounted() {
+    // Установим начальную громкость при монтировании компонента
+    this.volume = this.initialVolume;
+    this.updateVolume();
   },
   methods: {
     nextFrame() {
@@ -20,30 +27,40 @@ export default {
         router.push({ path: "/roadmap" });
       }
     },
-  },
+    updateVolume() {
+      if (window.audio) {
+        window.audio.volume = this.volume;
+      }
+    }
+  }
 };
 </script>
 
 <template>
   <div class="divcom">
-  <div class="comic-grid" @click="nextFrame">
-    <div v-if="currentFrame >= 1" class="comic-frame top-left">
-      <img :src="frames[0]" class="com" />
-    </div>
-    <div v-if="currentFrame >= 2" class="comic-frame top-right">
-      <img :src="frames[1]" class="com" />
-    </div>
-    <div v-if="currentFrame >= 3" class="comic-frame bottom-left">
-      <img :src="frames[2]" class="com" />
-    </div>
-    <div v-if="currentFrame >= 4" class="comic-frame bottom-right">
-      <img :src="frames[3]" class="com" />
+    <!-- 🎚️ Слайдер громкости -->
+    <div class="volume-control">
+      <input type="range" min="0" max="1" step="0.01" v-model="volume" @input="updateVolume" />
     </div>
 
-    <div class="progress-indicator">
-      Прогресс: {{ currentFrame }} / 4
+    <div class="comic-grid" @click="nextFrame">
+      <div v-if="currentFrame >= 1" class="comic-frame top-left">
+        <img :src="frames[0]" class="com" />
+      </div>
+      <div v-if="currentFrame >= 2" class="comic-frame top-right">
+        <img :src="frames[1]" class="com" />
+      </div>
+      <div v-if="currentFrame >= 3" class="comic-frame bottom-left">
+        <img :src="frames[2]" class="com" />
+      </div>
+      <div v-if="currentFrame >= 4" class="comic-frame bottom-right">
+        <img :src="frames[3]" class="com" />
+      </div>
+
+      <div class="progress-indicator">
+        Прогресс: {{ currentFrame }} / 4
+      </div>
     </div>
-  </div>
   </div>
 </template>
 
@@ -122,5 +139,21 @@ export default {
     opacity: 1;
     transform: scale(1);
   }
+}
+.volume-control {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  height: 30px;
+}
+
+.volume-control input[type="range"] {
+  width: 120px;
 }
 </style>
