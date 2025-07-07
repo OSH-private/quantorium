@@ -205,6 +205,11 @@ body, html {
 }
 
 .game {
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-drag: none;
+  -webkit-user-drag: none;
   min-height: 100vh;
   width: 100vw;
   background: url('../assets/fonroad.png') center center no-repeat;

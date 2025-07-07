@@ -56,16 +56,17 @@ export default {
       <div v-if="currentFrame >= 4" class="comic-frame bottom-right">
         <img :src="frames[3]" class="com" />
       </div>
-
-      <div class="progress-indicator">
-        Прогресс: {{ currentFrame }} / 4
-      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
 .divcom {
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-drag: none;
+  -webkit-user-drag: none;
   background-color: #000;
   width: 100vw;
   height: 100vh;
@@ -76,24 +77,23 @@ export default {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
-  gap: 10px;
   width: 90vw;
   max-width: 1500px;
-  height: 90vh;
+  height: 100vh;
   margin: 0 auto;
-  padding: 20px;
   position: relative;
   cursor: pointer;
 }
-
 .comic-frame {
+  pointer-events: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #333;
-  background-color: #7e7e7e;
   animation: fadeIn 0.4s ease-in-out;
   overflow: hidden;
+
+  margin-left: -152px;
+  margin-right: -152px;
 }
 
 .com {

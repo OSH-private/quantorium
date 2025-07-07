@@ -60,6 +60,11 @@ export default {
 }
 
 .container {
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-drag: none;
+  -webkit-user-drag: none;
   width: 100vw;
   height: 100vh;
   background-image: url('../../public/startimage.png');
