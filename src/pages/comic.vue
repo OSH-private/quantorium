@@ -92,8 +92,8 @@ export default {
   animation: fadeIn 0.4s ease-in-out;
   overflow: hidden;
 
-  margin-left: -152px;
-  margin-right: -152px;
+  margin-left: -130px;
+  margin-right: -130px;
 }
 
 .com {
