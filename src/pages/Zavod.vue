@@ -26,7 +26,8 @@ export default {
       typingInterval: null,
       showCharacter: true,
       isExiting: false,
-      dialogueFinished: false
+      dialogueFinished: false,
+      hoverQuest: null
     };
   },
 
@@ -86,6 +87,13 @@ export default {
       }
     },
 
+    setHoverQuest(num) {
+      this.hoverQuest = num;
+    },
+    clearHoverQuest() {
+      this.hoverQuest = null;
+    },
+
     Perehod2() {
       if (this.buttonsDisabled) return;
       router.push({ path: "/quest1" });
@@ -113,9 +121,18 @@ export default {
 
     <!-- Картинки квестов -->
     <div class="quest-images">
-      <img src="../assets/b1.svg" alt="Квест 1" class="quest-img" />
-      <img src="../assets/b2.svg" alt="Квест 2" class="quest-img" />
-      <img src="../assets/b3.svg" alt="Квест 3" class="quest-img" />
+      <div class="quest-container" :class="{ hover: hoverQuest === 1 }">
+        <img src="../assets/b1.svg" alt="Квест 1" class="quest-img" />
+        <img src="../assets/k1.svg" alt="Контур 1" class="quest-contour" />
+      </div>
+      <div class="quest-container" :class="{ hover: hoverQuest === 2 }">
+        <img src="../assets/b2.svg" alt="Квест 2" class="quest-img" />
+        <img src="../assets/k2.svg" alt="Контур 2" class="quest-contour" />
+      </div>
+      <div class="quest-container" :class="{ hover: hoverQuest === 3 }">
+        <img src="../assets/b3.svg" alt="Квест 3" class="quest-img" />
+        <img src="../assets/k3.svg" alt="Контур 3" class="quest-contour" />
+      </div>
     </div>
 
     <!-- Персонаж позади диалога -->
@@ -135,16 +152,22 @@ export default {
     <div class="button-layer">
       <button
           class="invisible-btn"
+          @mouseenter="setHoverQuest(1)"
+          @mouseleave="clearHoverQuest"
           @click.stop="Perehod2"
           :disabled="buttonsDisabled"
       ></button>
       <button
           class="invisible-btn"
+          @mouseenter="setHoverQuest(2)"
+          @mouseleave="clearHoverQuest"
           @click.stop="Perehod3"
           :disabled="buttonsDisabled"
       ></button>
       <button
           class="invisible-btn"
+          @mouseenter="setHoverQuest(3)"
+          @mouseleave="clearHoverQuest"
           @click.stop="PerehodG"
           :disabled="buttonsDisabled"
       ></button>
@@ -182,22 +205,45 @@ export default {
 }
 
 /* Картинки квестов */
-.quest-images img {
+.quest-images {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
+
+.quest-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+.quest-img,
+.quest-contour {
   position: absolute;
   width: 100%;
   height: 100%;
   top: 0;
   left: 0;
   object-fit: cover;
-  z-index: 10;
+  transition: opacity 0.4s ease;
+}
+
+.quest-contour {
+  opacity: 0;
+  z-index: -2;
+}
+
+.quest-container.hover .quest-contour {
+  opacity: 1;
 }
 
 .quest-img {
-  transition: box-shadow 0.3s, transform 0.3s;
-}
-.quest-img:hover {
-  box-shadow: 0 0 0 5px yellow;
-  transform: scale(1.02);
+  z-index: 2;
 }
 
 /* Персонаж позади диалога */
