@@ -91,7 +91,7 @@ export default {
       <div class="dialogue-box">
         <p>{{ typedText }}</p>
       </div>
-      <img class="character-image" src="../assets/pers.png" alt="Персонаж" />
+      <img class="character-image" src="../assets/e1.svg" alt="Персонаж" />
     </div>
 
     <!-- Кнопки -->
@@ -135,10 +135,10 @@ export default {
 }
 
 .character-image {
-  height: 80vh;
+  height: 90vh;
   position: absolute;
   right: 2vw;
-  bottom: 0;
+  bottom: -100px;
   z-index: 29; /* ниже диалога */
   transition: transform 1s ease, opacity 1s ease;
 }
