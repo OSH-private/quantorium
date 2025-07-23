@@ -148,24 +148,24 @@ export default {
       <p>{{ typedText }}</p>
     </div>
 
-    <!-- Невидимые кнопки -->
+    <!-- Кнопки зданий -->
     <div class="button-layer">
       <button
-          class="invisible-btn"
+          class="invisible-btn btn-quest1"
           @mouseenter="setHoverQuest(1)"
-          @mouseleave="clearHoverQuest"
-          @click.stop="Perehod2"
-          :disabled="buttonsDisabled"
-      ></button>
-      <button
-          class="invisible-btn"
-          @mouseenter="setHoverQuest(2)"
           @mouseleave="clearHoverQuest"
           @click.stop="Perehod3"
           :disabled="buttonsDisabled"
       ></button>
       <button
-          class="invisible-btn"
+          class="invisible-btn btn-quest2"
+          @mouseenter="setHoverQuest(2)"
+          @mouseleave="clearHoverQuest"
+          @click.stop="Perehod2"
+          :disabled="buttonsDisabled"
+      ></button>
+      <button
+          class="invisible-btn btn-quest3"
           @mouseenter="setHoverQuest(3)"
           @mouseleave="clearHoverQuest"
           @click.stop="PerehodG"
@@ -291,20 +291,18 @@ export default {
   margin: 0;
 }
 
-/* Кнопки */
+/* Кнопки зданий */
 .button-layer {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  display: flex;
   z-index: 30;
 }
 
 .invisible-btn {
-  width: 33.33%;
-  height: 100%;
+  position: absolute;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -313,6 +311,28 @@ export default {
 .invisible-btn:disabled {
   cursor: default;
   pointer-events: none;
+}
+
+/* Индивидуальное позиционирование кнопок */
+.btn-quest1 {
+  top: 25%;
+  left: 15%;
+  width: 23.5%;
+  height: 31%;
+}
+
+.btn-quest2 {
+  top: 50%;
+  left: 40%;
+  width: 30%;
+  height: 38%;
+}
+
+.btn-quest3 {
+  top: 12%;
+  left: 65%;
+  width: 20%;
+  height: 35%;
 }
 
 /* Кнопка ФИНАЛ ниже диалога */
