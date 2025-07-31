@@ -1,27 +1,45 @@
 <script>
 import { router } from "../router/index.js";
 
+// Импорт эмоций
+import e1 from "../assets/e1.svg";
+import e2 from "../assets/e2.svg";
+import e3 from "../assets/e3.svg";
+import e4 from "../assets/e4.svg";
+import e5 from "../assets/e5.svg";
+import e6 from "../assets/e6.svg";
+import e7 from "../assets/e7.svg";
+import e8 from "../assets/e8.svg";
+
 export default {
   data() {
     return {
       dialogue: [
-        "Это наш гараж с грузовиками.",
-        "Ярик это просто смешной котик, он наш водитель грузовика (добавлен в шутку).",
-        "Надо помочь Ярику отвезти БАТАРЕЮ ПИТАНИЯ в ЦЕНТРАЛЬНОЕ ЯДРО.",
-        "Для этого пролагай маршрут по нашей карте, а Ярик по твоему маршруту довезёт батарею до ядра.",
-        "Удачи!"
+        { text: "уааааа!", emotion: e4 },
+        { text: "Ля какой грузовик.", emotion: e7 },
+        { text: "Кстати в нём лежит какая то батарейка.", emotion: e4 },
+        { text: "Думаю это и есть то питание для ядра.", emotion: e1 },
+        { text: "Тогда давай поможем грузовичку доехать!", emotion: e2 }
       ],
       dialogueIndex: 0,
       typedText: "",
       typingInterval: null,
       showCharacter: true,
-      isExiting: false // для запуска анимации ухода
+      isExiting: false,
+      dialogueFinished: false,
+      hoverQuest: null
     };
   },
 
   computed: {
     currentLine() {
-      return this.dialogue[this.dialogueIndex];
+      return this.dialogue[this.dialogueIndex].text;
+    },
+    currentEmotion() {
+      return this.dialogue[this.dialogueIndex].emotion;
+    },
+    buttonsDisabled() {
+      return !this.dialogueFinished || this.typedText !== this.currentLine;
     }
   },
 
@@ -47,16 +65,13 @@ export default {
         } else {
           clearInterval(this.typingInterval);
         }
-      }, 40); // скорость печати
+      }, 40);
     },
 
     advanceDialogue() {
-      if (this.typingInterval) {
-        clearInterval(this.typingInterval);
-      }
+      if (this.typingInterval) clearInterval(this.typingInterval);
 
       if (this.typedText !== this.currentLine) {
-        // если печатает — сразу весь текст
         this.typedText = this.currentLine;
         return;
       }
@@ -64,19 +79,16 @@ export default {
       if (this.dialogueIndex < this.dialogue.length - 1) {
         this.dialogueIndex++;
       } else {
-        // анимация выхода
         this.isExiting = true;
+        this.dialogueFinished = true;
         setTimeout(() => {
           this.showCharacter = false;
-        }, 1000); // ждём окончания анимации
+        }, 1000);
       }
     },
-
-    Perehod1() {
-      router.push({ path: '/roadmap' });
-    },
     Perehod4() {
-      router.push({ path: '/quest3' });
+      if (this.buttonsDisabled) return;
+      router.push({ path: "/quest3" });
     }
   }
 };
@@ -84,114 +96,118 @@ export default {
 
 <template>
   <div class="div1" @click="advanceDialogue">
-    <p class="title">маршрут</p>
+    <!-- Фон -->
+    <img src="../assets/gar.svg" alt="Фон" class="background-img" />
+    <img
+        class="character-behind"
+        :class="{ exit: isExiting }"
+        :src="currentEmotion"
+        alt="Персонаж"
+    />
 
-    <!-- Диалоговый блок -->
+    <!-- Диалоговое окно -->
     <div v-if="showCharacter" class="dialogue-container" :class="{ exit: isExiting }">
-      <div class="dialogue-box">
-        <p>{{ typedText }}</p>
-      </div>
-      <img class="character-image" src="../assets/e1.svg" alt="Персонаж" />
+      <p>{{ typedText }}</p>
     </div>
-
-    <!-- Кнопки -->
-    <div class="button-row">
-      <button class="bot1" @click.stop="Perehod4">СТАРТ</button>
-      <button class="bot1" @click.stop="Perehod1">НАЗАД</button>
+    <div class="final-btn">
+      <button
+          @click.stop="Perehod4"
+          :disabled="buttonsDisabled"
+      >НАЧАТЬ</button>
     </div>
   </div>
 </template>
 
 <style scoped>
-.dialogue-container {
+.div1 {
+  width: 100vw;
+  height: 100vh;
   position: relative;
-  bottom: 0vh;
+  overflow: hidden;
+  background-color: black;
+  user-select: none;
+}
+
+/* Фон */
+.background-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+.quest-container.hover .quest-contour {
+  opacity: 1;
+}
+
+/* Персонаж позади диалога */
+.character-behind {
+  position: absolute;
+  bottom: -100px;
+  right: 2vw;
+  height: 90vh;
+  z-index: 20;
+  object-fit: contain;
+  transition: transform 1s ease, opacity 1s ease;
+}
+
+.character-behind.exit {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+/* Диалоговое окно */
+.dialogue-container {
+  position: absolute;
+  bottom: 0;
   left: 0;
   width: 100%;
   height: 30vh;
-  display: flex;
-  z-index: 30;
-  pointer-events: none;
-  transition: transform 1s ease, opacity 1s ease; /* для абсолютного позиционирования персонажа */
-}
-
-.dialogue-box {
+  z-index: 60;
   background: rgba(0, 0, 0, 0.6);
-  color: white;
+  transition: transform 1s ease, opacity 1s ease;
+  display: flex;
+  align-items: flex-start;
   padding: 2vw;
-  width: 100%;
-  height: 100%;
-  font-size: 3vw;
-  overflow-y: auto;
-  z-index: 31;
-  pointer-events: auto;
   box-sizing: border-box;
 }
-
 
 .dialogue-container.exit {
   transform: translateX(100%);
   opacity: 0;
 }
 
-.character-image {
-  height: 90vh;
+.dialogue-container p {
   position: absolute;
-  right: 2vw;
-  bottom: -100px;
-  z-index: 29; /* ниже диалога */
-  transition: transform 1s ease, opacity 1s ease;
+  font-size: 3vw;
+  color: white;
+  max-width: 100%;
+  margin: 0;
 }
 
-.dialogue-container.exit .character-image {
-  transform: translateX(-100%); /* картинка уходит влево */
-  opacity: 0;
-}
-
-.button-row {
+.final-btn {
   position: absolute;
-  bottom: 2vh;
-  left: 50%;
+  bottom: 5vh;
+  left: 90%;
   transform: translateX(-50%);
-  display: flex;
-  justify-content: center;
-  flex-wrap: nowrap;
-  gap: 20vw;
-  z-index: 10;
-  max-width: 90vw;
-  overflow-x: auto;
+  z-index: 50;
 }
 
-.bot1 {
-  border-radius: 25px;
+.final-btn button {
   font-size: 2vw;
-  height: 4vw;
-  min-width: 12vw;
-  flex-shrink: 0;
-  background-color: rgb(230, 210, 170);
+  padding: 1vw 2vw;
+  background-color: rgba(230, 210, 170, 0.9);
+  border: none;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: opacity 0.3s;
 }
 
-.div1 {
-  user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-drag: none;
-  -webkit-user-drag: none;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  background-image: url('../assets/fongarage.png');
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  overflow: hidden;
-}
-
-.title {
-  font-size: 6vw;
-  color: #000000;
-  text-align: center;
+.final-btn button:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 </style>

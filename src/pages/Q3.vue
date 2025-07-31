@@ -1,45 +1,68 @@
 <template>
-  <div class="game">
-    <div class="maze-wrapper">
+  <div class="container">
+    <img src="../assets/qu3.svg" alt="Фон" class="background-img" />
+
+    <!-- Очередь команд в виде изображений с возможностью прокрутки -->
+    <div class="queue-display">
       <div
-          class="maze-grid"
-          :style="{
-          width: gridWidth + 'px',
-          height: gridHeight + 'px'
-        }"
+          class="queue-content"
+          ref="queueContainer"
+          @wheel="handleScroll"
+          @mousedown="startDrag"
+          @mousemove="handleDrag"
+          @mouseup="endDrag"
+          @mouseleave="endDrag"
       >
         <div
-            v-for="(row, y) in maze"
-            :key="y"
-            class="row"
+            v-for="(cmd, index) in commandQueue"
+            :key="index"
+            class="command-icon"
+            :class="{ 'fade-out': index < currentCommandIndex }"
+            :style="{ transitionDelay: `${index * 0.1}s` }"
         >
-          <div
-              v-for="(cell, x) in row"
-              :key="x"
-              :class="['cell', cellClass(cell), isCarHere(x, y) ? 'car-cell' : '']"
-              :style="cellStyle"
-          />
+          <img :src="getCommandImage(cmd)" :alt="cmd" />
         </div>
-        <img
-            v-if="carVisible"
-            src="../assets/bip.png"
-            alt="Car"
-            class="car"
-            :style="carStyle"
-        />
       </div>
+      <div class="fade-overlay"></div>
     </div>
 
-    <div class="controls">
+    <!-- Кнопка старта - позиционируется отдельно -->
+    <button @click="start" class="start-btn">Старт</button>
+
+    <!-- Игровое поле -->
+    <div class="maze-grid"
+         :style="{
+           width: gridWidth + 'px',
+           height: gridHeight + 'px'
+         }">
+      <div
+          v-for="(row, y) in maze"
+          :key="y"
+          class="row"
+      >
+        <div
+            v-for="(cell, x) in row"
+            :key="x"
+            :class="['cell', cellClass(cell), isCarHere(x, y) ? 'car-cell' : '']"
+            :style="cellStyle"
+        />
+      </div>
+      <img
+          v-if="carVisible"
+          src="../assets/bip.png"
+          alt="Car"
+          class="car"
+          :style="carStyle"
+      />
+    </div>
+
+    <!-- Панель управления - позиционируется отдельно -->
+    <div class="controls-panel">
       <button @click="addCommand('up')">↑</button>
       <button @click="addCommand('down')">↓</button>
       <button @click="addCommand('left')">←</button>
       <button @click="addCommand('right')">→</button>
-      <button @click="start">Старт</button>
-      <button @click="reset">Сброс</button>
     </div>
-
-    <div class="queue">Очередь: {{ commandQueue.join(', ') }}</div>
 
     <!-- Модальное окно для уведомлений -->
     <div v-if="showModal" class="modal">
@@ -52,35 +75,35 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 
-const tileSize = 100 // 100x100 pixels per block
-const mazeWidth = 14 // 14 blocks wide
-const mazeHeight = 7 // 9 blocks tall
+// Импортируем изображения для команд
+import upImage from '../assets/cn1.svg'
+import downImage from '../assets/cn2.svg'
+import leftImage from '../assets/cn3.svg'
+import rightImage from '../assets/cn4.svg'
+
+const tileSize = 100
+const mazeWidth = 12
+const mazeHeight = 7
 const gridWidth = computed(() => tileSize * mazeWidth)
 const gridHeight = computed(() => tileSize * mazeHeight)
 
-// Maze definition:
-// 0 - empty space
-// 1 - wall
-// 2 - start position
-// 3 - checkpoint
-// 4 - finish
 const maze = [
-  [1,2,0,0,0,0,0,0,0,1,0,0,0,1],
-  [1,0,0,0,0,0,0,1,0,1,0,1,0,1],
-  [1,1,1,1,0,0,0,0,0,1,0,1,0,1],
-  [1,0,0,0,0,0,1,1,0,1,0,1,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,1,4,1],
-  [1,3,1,0,0,0,0,1,1,1,1,1,0,1],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+  [1,2,0,0,0,0,0,0,0,1,0,1],
+  [1,0,0,0,0,0,0,1,0,1,0,1],
+  [1,1,1,1,0,0,0,0,0,1,0,1],
+  [1,0,0,0,0,0,1,1,0,1,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,1],
+  [1,3,1,0,0,0,0,1,1,1,4,1],
+  [0,0,0,0,0,0,0,0,0,0,0,0]
 ]
 
 const posX = ref(1)
 const posY = ref(1)
 const targetX = ref(1)
 const targetY = ref(1)
-const rotation = ref(0) // Начальный поворот - носом вверх
+const rotation = ref(0)
 const targetRotation = ref(0)
 const passedCheckpoint = ref(false)
 const commandQueue = ref([])
@@ -88,6 +111,13 @@ const carVisible = computed(() => true)
 const isMoving = ref(false)
 const showModal = ref(false)
 const modalMessage = ref('')
+const currentCommandIndex = ref(0)
+
+// Переменные для обработки прокрутки и перетаскивания
+const queueContainer = ref(null)
+const isDragging = ref(false)
+const startY = ref(0)
+const scrollTop = ref(0)
 
 const cellStyle = computed(() => ({
   width: tileSize + 'px',
@@ -102,6 +132,40 @@ const carStyle = computed(() => ({
   transform: `rotate(${rotation.value}deg)`,
   transition: 'transform 0.3s ease-out, left 0.3s ease-out, top 0.3s ease-out'
 }))
+
+function getCommandImage(cmd) {
+  const images = {
+    'up': upImage,
+    'down': downImage,
+    'left': leftImage,
+    'right': rightImage
+  }
+  return images[cmd]
+}
+
+// Функции для обработки прокрутки и перетаскивания
+function handleScroll(e) {
+  if (queueContainer.value) {
+    queueContainer.value.scrollTop += e.deltaY
+  }
+}
+
+function startDrag(e) {
+  isDragging.value = true
+  startY.value = e.pageY - queueContainer.value.offsetTop
+  scrollTop.value = queueContainer.value.scrollTop
+}
+
+function handleDrag(e) {
+  if (!isDragging.value) return
+  const y = e.pageY - queueContainer.value.offsetTop
+  const walk = (y - startY.value) * 2
+  queueContainer.value.scrollTop = scrollTop.value - walk
+}
+
+function endDrag() {
+  isDragging.value = false
+}
 
 function cellClass(cell) {
   return {
@@ -119,12 +183,19 @@ function isCarHere(x, y) {
 
 function addCommand(cmd) {
   commandQueue.value.push(cmd)
+  // Прокручиваем вниз при добавлении новой команды
+  nextTick(() => {
+    if (queueContainer.value) {
+      queueContainer.value.scrollTop = queueContainer.value.scrollHeight
+    }
+  })
 }
 
 function reset() {
   findStartPosition()
   commandQueue.value = []
   isMoving.value = false
+  currentCommandIndex.value = 0
 }
 
 function showNotification(message) {
@@ -144,7 +215,7 @@ function findStartPosition() {
         posY.value = y
         targetX.value = x
         targetY.value = y
-        rotation.value = 0 // Носом вверх
+        rotation.value = 0
         targetRotation.value = 0
         passedCheckpoint.value = false
         return
@@ -156,21 +227,23 @@ function findStartPosition() {
 async function start() {
   if (isMoving.value) return
 
-  // Сброс позиции перед началом движения
   findStartPosition()
-  await new Promise(resolve => setTimeout(resolve, 100)) // Небольшая задержка для сброса
+  await new Promise(resolve => setTimeout(resolve, 100))
 
   isMoving.value = true
+  currentCommandIndex.value = 0
   await execute([...commandQueue.value])
   isMoving.value = false
 }
 
 async function execute(queue) {
-  if (queue.length === 0) return
+  if (queue.length === 0) {
+    commandQueue.value = []
+    return
+  }
 
   const cmd = queue.shift()
 
-  // Set target rotation based on command
   if (cmd === 'up') {
     targetRotation.value = 0
   } else if (cmd === 'down') {
@@ -181,11 +254,9 @@ async function execute(queue) {
     targetRotation.value = 90
   }
 
-  // Wait for rotation to complete
   rotation.value = targetRotation.value
   await new Promise(resolve => setTimeout(resolve, 300))
 
-  // Calculate movement path
   let path = []
   let currentX = targetX.value
   let currentY = targetY.value
@@ -204,34 +275,29 @@ async function execute(queue) {
       nextX++
     }
 
-    // Check boundaries
     if (nextX < 0 || nextY < 0 || nextX >= mazeWidth || nextY >= mazeHeight) {
       break
     }
 
-    // Check if next cell is a wall
     if (maze[nextY][nextX] === 1) {
       break
     }
 
-    // Add to path
     path.push({ x: nextX, y: nextY })
     currentX = nextX
     currentY = nextY
   }
 
   if (path.length === 0) {
-    // No movement possible in this direction
+    currentCommandIndex.value++
     await execute(queue)
     return
   }
 
-  // Move through the path
   for (const point of path) {
     targetX.value = point.x
     targetY.value = point.y
 
-    // Animate movement
     const steps = 10
     for (let i = 0; i <= steps; i++) {
       const progress = i / steps
@@ -240,7 +306,6 @@ async function execute(queue) {
       await new Promise(resolve => setTimeout(resolve, 30))
     }
 
-    // Check current cell
     const cell = maze[point.y][point.x]
 
     if (cell === 3) {
@@ -258,61 +323,177 @@ async function execute(queue) {
     }
   }
 
-  // Continue with next command
+  currentCommandIndex.value++
   await execute(queue)
 }
 
-// Initialize car position
 findStartPosition()
 </script>
 
 <style scoped>
-.game {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  padding: 20px;
+.container {
   position: relative;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  margin: 0 auto;
+  user-select: none;
 }
 
-.maze-wrapper {
-  border: 4px solid #333;
-  overflow: hidden;
+.background-img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
 }
 
 .maze-grid {
-  position: relative;
-  background-color: #f0f0f0;
+  position: absolute;
+  top: 126px;
+  left: 570px;
+  background-color: rgba(240, 240, 240, 0.8);
+  border: 2px solid #333;
+  z-index: 1;
+}
+
+.queue-display {
+  mask-image: linear-gradient(to top, transparent 0%, black 3%, black 98%, transparent 100%);
+  position: absolute;
+  top: 126px;
+  left: 200px;
+  width: 300px;
+  height: 720px;
+  z-index: 2;
+  background: transparent;
+  overflow: hidden;
+}
+
+.queue-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 10px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.queue-content::-webkit-scrollbar {
+  display: none;
+}
+
+.command-icon {
+  width: 285px;
+  height: 92px;
+  flex-shrink: 0;
+  pointer-events: none;
+  user-select: none;
+  opacity: 1;
+  transition: opacity 0.3s ease-out;
+}
+
+.command-icon.fade-out {
+  opacity: 0;
+}
+
+.command-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.fade-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.start-btn {
+  position: absolute;
+  top: 861px;
+  left: 146px;
+  height: 106px;
+  width: 357px;
+  cursor: pointer;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  z-index: 2;
+  user-select: none;
+}
+
+.start-btn:hover {
+  background: #45a049;
+}
+
+.controls-panel {
+  position: absolute;
+  top: 870px;
+  left: 565px;
+  display: flex;
+  gap: 23px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  z-index: 2;
+  user-select: none;
+}
+
+.controls-panel button {
+  height: 92px;
+  width: 285px;
+  cursor: pointer;
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  min-width: 60px;
+  user-select: none;
+}
+
+.controls-panel button:hover {
+  background: #e0e0e0;
 }
 
 .row {
   display: flex;
+  user-select: none;
 }
 
 .cell {
   box-sizing: border-box;
   border: 1px solid #000000;
+  user-select: none;
 }
 
 .empty {
-  background-color: white;
+  background-color: rgba(255, 255, 255, 0.7);
 }
 
 .wall {
-  background-color: #333;
+  background-color: rgba(51, 51, 51, 0.9);
 }
 
 .start {
-  background-color: #84ff7e;
+  background-color: rgba(132, 255, 126, 0.7);
 }
 
 .checkpoint {
-  background-color: #ffff84;
+  background-color: rgba(255, 255, 132, 0.7);
 }
 
 .finish {
-  background-color: #ffaaaa;
+  background-color: rgba(255, 170, 170, 0.7);
 }
 
 .car {
@@ -320,25 +501,9 @@ findStartPosition()
   transition: all 0.3s ease;
   z-index: 10;
   transform-origin: center;
+  user-select: none;
 }
 
-.controls {
-  display: flex;
-  gap: 10px;
-}
-
-.controls button {
-  padding: 10px 15px;
-  font-size: 18px;
-  cursor: pointer;
-}
-
-.queue {
-  font-size: 18px;
-  margin-top: 10px;
-}
-
-/* Стили для модального окна */
 .modal {
   position: fixed;
   top: 0;
@@ -350,6 +515,7 @@ findStartPosition()
   justify-content: center;
   align-items: center;
   z-index: 100;
+  user-select: none;
 }
 
 .modal-content {
