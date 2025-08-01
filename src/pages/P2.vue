@@ -133,7 +133,7 @@ const getY = (point) => {
 </script>
 
 <template>
-  <div class="wrapper">
+  <div>
     <svg class="game" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet">
       <!-- Соединения -->
       <line

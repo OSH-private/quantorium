@@ -90,7 +90,7 @@ const reset = () => {
   connections.value = []
 }
 
-const Perehod5 = () => router.push({ path: '/quest5' })
+const Perehod5 = () => router.push({ path: '/quest1' })
 
 onMounted(() => {
   document.addEventListener('mousemove', updateDrag)
@@ -99,26 +99,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="game">
-    <svg width="600" height="300">
-      <!-- Источники -->
-      <circle :cx="red.x" :cy="red.y" r="20" fill="red" @mousedown="startDrag('red', $event)" />
-      <circle :cx="green.x" :cy="green.y" r="20" fill="green" @mousedown="startDrag('green', $event)" />
-      <circle :cx="blue.x" :cy="blue.y" r="20" fill="blue" @mousedown="startDrag('blue', $event)" />
-
-      <!-- Фильтр -->
-      <rect
-          :x="filter.x - 25"
-          :y="filter.y - 25"
-          width="50"
-          height="50"
-          fill="lightgreen"
-          @mousedown="startDrag('filter', $event)"
-      />
-      <text :x="filter.x - 15" :y="filter.y + 5" font-size="14">Фильтр</text>
-
-      <!-- Лампа -->
-      <circle :cx="lamp.x" :cy="lamp.y" r="20" :fill="allCorrect ? 'lime' : '#444'" />
+  <div >
+    <svg class="game" >
 
       <!-- Провода -->
       <line
@@ -133,6 +115,28 @@ onMounted(() => {
           stroke-linecap="round"
       />
 
+      <!-- Источники -->
+      <circle :cx="red.x" :cy="red.y" r="20" class="items" fill="red" @mousedown="startDrag('red', $event)" />
+      <circle :cx="green.x" :cy="green.y" r="20" class="items" fill="green" @mousedown="startDrag('green', $event)" />
+      <circle :cx="blue.x" :cy="blue.y" r="20" class="items" fill="blue" @mousedown="startDrag('blue', $event)" />
+
+      <!-- Фильтр -->
+      <rect
+          :x="filter.x - 25"
+          :y="filter.y - 25"
+          width="50"
+          height="50"
+          class="items"
+          fill="lightgreen"
+          @mousedown="startDrag('filter', $event)"
+      />
+      <text @mousedown="startDrag('filter', $event)" class="items" :x="filter.x - 15" :y="filter.y + 5" font-size="14">Фильтр</text>
+
+      <!-- Лампа -->
+      <circle :cx="lamp.x" :cy="lamp.y" r="20" class="items" :fill="allCorrect ? 'lime' : '#444'" />
+
+
+
       <!-- Активная линия -->
       <line
           v-if="dragging.active"
@@ -146,36 +150,60 @@ onMounted(() => {
       />
     </svg>
 
-    <!-- Управление -->
     <div class="controls">
-      <button class="bot1" @click="reset">Сбросить</button>
-    </div>
-
-    <div v-if="allCorrect" class="success">
-      ✅ Правильно! Только зелёный прошёл фильтр.
-      <button class="bot1" @click="Perehod5">Готово</button>
+      <div v-if="!allCorrect" class="btns" @click="reset">
+        Сбросить
+      </div>
+      <div v-if="allCorrect" class="end">
+        <div class="success">🔥 Обе лампы зажглись!</div>
+        <div class="btns" @click="Perehod5">Готово</div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.end{
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  margin-left: auto;
+}
+.btns{
+  margin-left: auto;
+  border: 2px outset black;
+  background-color: rgb(70, 125, 190);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  display: flex;
+  border-radius: 25px;
+  font-size: 3vw;
+  height: 7vh;
+  width: 15vw;
+}
+.controls{
+  justify-content:space-between;
+  align-items: center;
+  display: flex;
+  width: 80vw;
+  height: 20vh;
+  margin: auto;
+}
 .game {
   user-select: none;
+  height: 80vh;
+  width: 100vw;
 }
 .success {
-  margin-top: 20px;
   font-size: 24px;
   color: green;
+  margin-right: 2vw;
 }
-.controls {
-  margin-top: 20px;
+
+.items{
+  cursor: pointer;
 }
-.bot1 {
-  color: white;
-  font-size: 5vw;
-  height: 7vw;
-  width: 20vw;
-  border-radius: 25px;
-  background-color: rgb(70, 125, 190);
-}
+
 </style>
