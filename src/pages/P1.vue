@@ -1,33 +1,216 @@
-<script>
-import {router} from "../router/index.js";
+<script setup>
+import { ref, reactive, computed, onMounted } from 'vue'
+import { router } from '../router/index.js'
 
-export default {
-  methods: {
-    Perehod3() {
-      router.push({path: '/quest2'});
+const wires = reactive([
+  { color: 'red', start: { x: 0.1, y: 0.2 }, end: { x: 0.9, y: 0.8 } },
+  { color: 'blue', start: { x: 0.1, y: 0.5 }, end: { x: 0.9, y: 0.2 } },
+  { color: 'green', start: { x: 0.1, y: 0.8 }, end: { x: 0.9, y: 0.5 } }
+])
+
+const VIEWBOX_WIDTH = 600
+const VIEWBOX_HEIGHT = 300
+
+const connections = ref([]) // [{ from: 0, to: 0 }, ...]
+const dragging = reactive({ index: null, active: false, x: 0, y: 0 })
+
+const startDrag = (index, event) => {
+  if (connections.value.some(conn => conn.from === index)) return
+  const { x, y } = getMousePositionInViewBox(event)
+  dragging.index = index
+  dragging.active = true
+  dragging.x = x
+  dragging.y = y
+}
+
+const updateDrag = (event) => {
+  if (!dragging.active) return
+  const { x, y } = getMousePositionInViewBox(event)
+  dragging.x = x
+  dragging.y = y
+}
+
+const endDrag = () => {
+  if (dragging.index === null) return
+  const to = getNearestEnd(dragging.x, dragging.y)
+  if (
+      to !== null &&
+      !connections.value.some(conn => conn.to === to)
+  ) {
+    connections.value.push({ from: dragging.index, to })
+    playConnectSound()
+  }
+
+  dragging.active = false
+  dragging.index = null
+}
+
+const getNearestEnd = (xNorm, yNorm) => {
+  const x = xNorm * VIEWBOX_WIDTH
+  const y = yNorm * VIEWBOX_HEIGHT
+
+  let nearest = null
+  let minDist = 20
+  wires.forEach((wire, i) => {
+    const dx = x - wire.end.x * VIEWBOX_WIDTH
+    const dy = y - wire.end.y * VIEWBOX_HEIGHT
+    const dist = Math.sqrt(dx * dx + dy * dy)
+    if (dist < minDist) {
+      nearest = i
+      minDist = dist
     }
+  })
+  return nearest
+}
+
+const getMousePositionInViewBox = (event) => {
+  const svg = event.target.ownerSVGElement || document.querySelector('svg')
+  const pt = svg.createSVGPoint()
+  pt.x = event.clientX
+  pt.y = event.clientY
+  const svgP = pt.matrixTransform(svg.getScreenCTM().inverse())
+  return {
+    x: svgP.x / VIEWBOX_WIDTH,
+    y: svgP.y / VIEWBOX_HEIGHT
   }
 }
+
+const allConnected = computed(() => {
+  if (connections.value.length !== wires.length) return false
+  const isConnected = connections.value.every(conn => {
+    return wires[conn.from].color === wires[conn.to].color
+  })
+  if (isConnected) {
+    playSuccessSound()
+  }
+  return isConnected
+})
+
+const playConnectSound = () => {
+  const audio = new Audio('../public/connected.mp3')
+  audio.play()
+}
+
+const playSuccessSound = () => {
+  const audio = new Audio('../public/completed.mp3')
+  audio.play()
+}
+
+const resetConnections = () => {
+  connections.value = []
+}
+
+const Perehod3 = () => {
+  router.push({ path: '/P2' })
+}
+
+onMounted(() => {
+  document.addEventListener('mousemove', updateDrag)
+  document.addEventListener('mouseup', endDrag)
+})
 </script>
 
 <template>
-  <div>
-    <div class="div1">
-      <p style="font-size: 4vw; color: #92b3d3">
-        КВЕСТ 1
-      </p>
-      <div class="div2">
-        <button class="bot1" @click="Perehod3">
-          выйти
-        </button>
-      </div>
+  <div class="wrapper">
+    <svg class="game" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet">
+
+    <g v-for="(wire, index) in wires" :key="index">
+        <!-- Источник -->
+      <circle
+          :cx="wire.start.x * VIEWBOX_WIDTH"
+          :cy="wire.start.y * VIEWBOX_HEIGHT"
+          r="20"
+          :fill="wire.color"
+          @mousedown="startDrag(index, $event)"
+      />
+
+        <!-- Приёмник -->
+        <circle
+            :cx="wire.end.x * VIEWBOX_WIDTH"
+            :cy="wire.end.y * VIEWBOX_HEIGHT"
+            r="20"
+            :fill="wire.color"
+        />
+      </g>
+
+      <!-- Протянутые линии -->
+      <line
+          v-for="(conn, i) in connections"
+          :key="i"
+          :x1="wires[conn.from].start.x * VIEWBOX_WIDTH"
+          :y1="wires[conn.from].start.y * VIEWBOX_HEIGHT"
+          :x2="wires[conn.to].end.x * VIEWBOX_WIDTH"
+          :y2="wires[conn.to].end.y * VIEWBOX_HEIGHT"
+          stroke="gray"
+          stroke-width="30"
+          stroke-linecap="round"
+      />
+
+      <!-- Активная линия -->
+      <line
+          v-if="dragging.active"
+          :x1="wires[dragging.index].start.x * VIEWBOX_WIDTH"
+          :y1="wires[dragging.index].start.y * VIEWBOX_HEIGHT"
+          :x2="dragging.x * VIEWBOX_WIDTH"
+          :y2="dragging.y * VIEWBOX_HEIGHT"
+          stroke="gray"
+          stroke-dasharray="5,5"
+          stroke-width="5"
+      />
+    </svg>
+    <div class="controls">
+        <div v-if="!allConnected" class="btns" @click="resetConnections">
+          Сбросить
+        </div>
+        <div v-if="allConnected" class="end">
+          <div class="success">🎉 Все соединения правильные!</div>
+          <div class="btns" @click="Perehod3">Готово</div>
+        </div>
     </div>
+
   </div>
 </template>
 
 <style scoped>
-
-.div1 {
+.end{
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  margin-left: auto;
+}
+.btns{
+  margin-left: auto;
+  border: 2px outset black;
+  background-color: rgb(70, 125, 190);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  display: flex;
+  border-radius: 25px;
+  font-size: 3vw;
+  height: 7vh;
+  width: 15vw;
+}
+.controls{
+  justify-content:space-between;
+  align-items: center;
+  display: flex;
+  width: 80vw;
+  height: 20vh;
+  margin: auto;
+}
+.success {
+  font-size: 24px;
+  color: green;
+  margin-right: 2vw;
+}
+.game {
+  user-select: none;
+  width: 100%;
+  height: 80%;
+}
+.wrapper {
   user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
@@ -38,29 +221,10 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background-image: url('../assets/provoda.png');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
   overflow: hidden;
 }
 
-.bot1 {
-  color: white;
-  margin-top: 1vw;
-  font-size: 5vw;
-  height: 7vw;
-  width: 20vw;
-  border-radius: 25px;
-  background-color: rgb(70, 125, 190);
-}
-.div2 {
-  font-size: 40vw;
-  margin-top: 5vw;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin-left: 75vw;
-  margin-bottom: 2vw;
-}
 </style>
