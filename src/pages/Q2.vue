@@ -251,9 +251,9 @@ export default {
 /* Персонаж позади диалога */
 .character-behind {
   position: absolute;
-  bottom: -100px;
+  bottom: -300px;
   right: 2vw;
-  height: 90vh;
+  height: 130vh;
   z-index: 20;
   object-fit: contain;
   transition: transform 1s ease, opacity 1s ease;

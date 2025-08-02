@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+    <!-- Фоновое изображение с высоким z-index -->
     <img src="../assets/qu3.svg" alt="Фон" class="background-img" />
 
     <!-- Очередь команд в виде изображений с возможностью прокрутки -->
@@ -90,12 +91,12 @@ const gridWidth = computed(() => tileSize * mazeWidth)
 const gridHeight = computed(() => tileSize * mazeHeight)
 
 const maze = [
-  [1,2,0,0,0,0,0,0,0,1,0,1],
-  [1,0,0,0,0,0,0,1,0,1,0,1],
-  [1,1,1,1,0,0,0,0,0,1,0,1],
-  [1,0,0,0,0,0,1,1,0,1,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,1],
-  [1,3,1,0,0,0,0,1,1,1,4,1],
+  [1,0,1,1,0,0,0,1,1,0,0,0],
+  [1,2,0,0,0,0,1,1,1,0,0,1],
+  [1,0,1,0,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0],
+  [1,3,0,0,0,0,0,0,0,0,0,1],
+  [1,0,1,1,1,0,1,1,1,4,0,1],
   [0,0,0,0,0,0,0,0,0,0,0,0]
 ]
 
@@ -345,7 +346,8 @@ findStartPosition()
   width: 100%;
   height: 100%;
   object-fit: cover;
-  z-index: 0;
+  z-index: 15;
+  pointer-events: none; /* Клики проходят сквозь фон */
 }
 
 .maze-grid {
@@ -354,7 +356,7 @@ findStartPosition()
   left: 570px;
   background-color: rgba(240, 240, 240, 0.8);
   border: 2px solid #333;
-  z-index: 1;
+  z-index: 16;
 }
 
 .queue-display {
@@ -364,7 +366,7 @@ findStartPosition()
   left: 200px;
   width: 300px;
   height: 720px;
-  z-index: 2;
+  z-index: 17; /* Выше фона */
   background: transparent;
   overflow: hidden;
 }
@@ -415,7 +417,7 @@ findStartPosition()
   right: 0;
   height: 50px;
   pointer-events: none;
-  z-index: 3;
+  z-index: 11;
 }
 
 .start-btn {
@@ -429,7 +431,7 @@ findStartPosition()
   color: white;
   border: none;
   border-radius: 6px;
-  z-index: 2;
+  z-index: 10; /* Выше фона */
   user-select: none;
 }
 
@@ -446,7 +448,7 @@ findStartPosition()
   background: rgba(255, 255, 255, 0.8);
   border-radius: 8px;
   border: 1px solid #ccc;
-  z-index: 2;
+  z-index: 10; /* Выше фона */
   user-select: none;
 }
 
@@ -499,7 +501,7 @@ findStartPosition()
 .car {
   position: absolute;
   transition: all 0.3s ease;
-  z-index: 10;
+  z-index: 20; /* Машинка выше всего */
   transform-origin: center;
   user-select: none;
 }
