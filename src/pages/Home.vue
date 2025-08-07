@@ -1,3 +1,11 @@
+<template>
+  <div class="scaling-wrapper">
+    <div class="scene">
+      <button class="start-button" @click="Perehod1">СТАРТ</button>
+    </div>
+  </div>
+</template>
+
 <script>
 import { router } from "../router/index.js";
 
@@ -6,14 +14,13 @@ export default {
     async Perehod1() {
       await this.goFullscreen();
 
-      // Инициализируем и запускаем музыку один раз
       if (!window.audio) {
         window.audio = new Audio("../../public/background.mp3");
         window.audio.loop = true;
         window.audio.volume = 0.5;
 
         try {
-          await window.audio.play(); // запускаем звук
+          await window.audio.play();
         } catch (err) {
           console.warn("Автовоспроизведение не удалось:", err);
         }
@@ -24,16 +31,11 @@ export default {
 
     goFullscreen() {
       const el = document.documentElement;
-
-      if (el.requestFullscreen) {
-        return el.requestFullscreen();
-      } else if (el.webkitRequestFullscreen) {
-        return el.webkitRequestFullscreen();
-      } else if (el.mozRequestFullScreen) {
-        return el.mozRequestFullScreen();
-      } else if (el.msRequestFullscreen) {
-        return el.msRequestFullscreen();
-      } else {
+      if (el.requestFullscreen) return el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
+      else if (el.mozRequestFullScreen) return el.mozRequestFullScreen();
+      else if (el.msRequestFullscreen) return el.msRequestFullscreen();
+      else {
         console.warn("Fullscreen API не поддерживается");
         return Promise.resolve();
       }
@@ -42,53 +44,63 @@ export default {
 };
 </script>
 
-<template>
-  <div class="container">
-    <button class="bot1" @click="Perehod1">
-      СТАРТ
-    </button>
-  </div>
-</template>
-
 <style scoped>
-:global(html, body) {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  height: 100%;
-  width: 100%;
-}
-
-.container {
-  user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-drag: none;
-  -webkit-user-drag: none;
+/* Контейнер, заполняющий экран и масштабирующий сцену */
+.scaling-wrapper {
   width: 100vw;
   height: 100vh;
-  background-image: url('../../public/startimage.png');
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: black;
+  overflow: hidden;
+}
+
+/* "Сцена" с фиксированным соотношением сторон, масштабируется целиком */
+.scene {
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  background-image: url("../../public/startimage.svg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  padding-bottom: 9vw;
-  box-sizing: border-box;
+  transform-origin: top left;
+  scale: 1;
 }
 
-.bot1 {
-  display: flex;
-  color: #f5f7db;
-  justify-content: center;
-  align-items: center;
-  border-radius: 30px;
-  font-size: 5vw;
-  height: 5.5vw;
-  width: 21vw;
-  background-color: rgb(0, 0, 0);
-  font-weight: 900;
+/* Автоматическое масштабирование сцены под экран */
+.scaling-wrapper .scene {
+  transform: scale(calc(100vw / 1920));
+}
+
+/* Для экранов с малой высотой – масштаб по высоте */
+@media (max-aspect-ratio: 16/9) {
+  .scaling-wrapper .scene {
+    transform: scale(calc(100vh / 1080));
+  }
+}
+
+.start-button {
+  position: absolute;
+  left: 50%;
+  top: 62%;
+  transform: translateX(-50%);
+  width: 400px;
+  height: 140px;
+  background-image: url("../../public/start_button.png");
+  background-size: cover;
+  background-color: transparent;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0;
+  color: rgba(0, 0, 0, 0);
+  transition: transform 0.3s ease-out;
+  z-index: 10;
+}
+
+.start-button:hover {
+  transform: translateX(-50%) scale(1.05);
 }
 </style>

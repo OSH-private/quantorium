@@ -30,11 +30,13 @@
     <!-- Кнопка старта - позиционируется отдельно -->
     <button @click="start" class="start-btn">Старт</button>
 
-    <!-- Игровое поле -->
+    <!-- Игровое поле (теперь полностью прозрачное) -->
     <div class="maze-grid"
          :style="{
            width: gridWidth + 'px',
-           height: gridHeight + 'px'
+           height: gridHeight + 'px',
+           background: 'transparent',
+           border: 'none'
          }">
       <div
           v-for="(row, y) in maze"
@@ -57,7 +59,7 @@
       />
     </div>
 
-    <!-- Панель управления - позиционируется отдельно -->
+    <!-- Панель управления -->
     <div class="controls-panel">
       <button @click="addCommand('up')">↑</button>
       <button @click="addCommand('down')">↓</button>
@@ -144,7 +146,6 @@ function getCommandImage(cmd) {
   return images[cmd]
 }
 
-// Функции для обработки прокрутки и перетаскивания
 function handleScroll(e) {
   if (queueContainer.value) {
     queueContainer.value.scrollTop += e.deltaY
@@ -184,7 +185,6 @@ function isCarHere(x, y) {
 
 function addCommand(cmd) {
   commandQueue.value.push(cmd)
-  // Прокручиваем вниз при добавлении новой команды
   nextTick(() => {
     if (queueContainer.value) {
       queueContainer.value.scrollTop = queueContainer.value.scrollHeight
@@ -347,16 +347,40 @@ findStartPosition()
   height: 100%;
   object-fit: cover;
   z-index: 15;
-  pointer-events: none; /* Клики проходят сквозь фон */
+  pointer-events: none;
 }
 
 .maze-grid {
   position: absolute;
   top: 126px;
   left: 570px;
-  background-color: rgba(240, 240, 240, 0.8);
-  border: 2px solid #333;
+  background: transparent;
+  border: none;
   z-index: 16;
+}
+
+.row {
+  display: flex;
+  user-select: none;
+}
+
+.cell {
+  box-sizing: border-box;
+  border: none;
+  user-select: none;
+}
+
+.empty, .wall, .start, .checkpoint, .finish {
+  background-color: transparent;
+  border: none;
+}
+
+.car {
+  position: absolute;
+  transition: all 0.3s ease;
+  z-index: 20;
+  transform-origin: center;
+  user-select: none;
 }
 
 .queue-display {
@@ -366,7 +390,7 @@ findStartPosition()
   left: 200px;
   width: 300px;
   height: 720px;
-  z-index: 17; /* Выше фона */
+  z-index: 17;
   background: transparent;
   overflow: hidden;
 }
@@ -431,7 +455,7 @@ findStartPosition()
   color: white;
   border: none;
   border-radius: 6px;
-  z-index: 10; /* Выше фона */
+  z-index: 10;
   user-select: none;
 }
 
@@ -448,7 +472,7 @@ findStartPosition()
   background: rgba(255, 255, 255, 0.8);
   border-radius: 8px;
   border: 1px solid #ccc;
-  z-index: 10; /* Выше фона */
+  z-index: 10;
   user-select: none;
 }
 
@@ -465,45 +489,6 @@ findStartPosition()
 
 .controls-panel button:hover {
   background: #e0e0e0;
-}
-
-.row {
-  display: flex;
-  user-select: none;
-}
-
-.cell {
-  box-sizing: border-box;
-  border: 1px solid #000000;
-  user-select: none;
-}
-
-.empty {
-  background-color: rgba(255, 255, 255, 0.7);
-}
-
-.wall {
-  background-color: rgba(51, 51, 51, 0.9);
-}
-
-.start {
-  background-color: rgba(132, 255, 126, 0.7);
-}
-
-.checkpoint {
-  background-color: rgba(255, 255, 132, 0.7);
-}
-
-.finish {
-  background-color: rgba(255, 170, 170, 0.7);
-}
-
-.car {
-  position: absolute;
-  transition: all 0.3s ease;
-  z-index: 20; /* Машинка выше всего */
-  transform-origin: center;
-  user-select: none;
 }
 
 .modal {
