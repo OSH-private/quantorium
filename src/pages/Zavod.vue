@@ -1,5 +1,6 @@
 <script>
 import { router } from "../router/index.js";
+import { useHomeStore } from "../stores/home";
 
 // Импортируем эмоции
 import e1 from "../assets/e1.svg";
@@ -50,7 +51,15 @@ export default {
   },
 
   mounted() {
-    this.typeText();
+    //useHomeStore().setDialogueSeen(false)
+    const homeStore = useHomeStore();
+
+    if (homeStore.dialogueSeen) {
+      this.showCharacter = false;
+      this.dialogueFinished = true;
+    } else {
+      this.typeText();
+    }
   },
 
   methods: {
@@ -68,6 +77,12 @@ export default {
       }, 40);
     },
 
+    handleClick() {
+      if (!this.dialogueFinished && this.showCharacter) {
+        this.advanceDialogue();
+      }
+    },
+
     advanceDialogue() {
       if (this.typingInterval) clearInterval(this.typingInterval);
 
@@ -81,6 +96,10 @@ export default {
       } else {
         this.isExiting = true;
         this.dialogueFinished = true;
+
+        const homeStore = useHomeStore();
+        homeStore.setDialogueSeen(true);
+
         setTimeout(() => {
           this.showCharacter = false;
         }, 1000);
@@ -115,7 +134,7 @@ export default {
 </script>
 
 <template>
-  <div class="div1" @click="advanceDialogue">
+  <div class="div1" @click="handleClick">
     <!-- Фон -->
     <img src="../assets/zavodfon.svg" alt="Фон" class="background-img" />
 
@@ -136,7 +155,7 @@ export default {
     </div>
 
     <!-- Персонаж позади диалога -->
-    <img
+    <img v-if="showCharacter"
         class="character-behind"
         :class="{ exit: isExiting }"
         :src="currentEmotion"
