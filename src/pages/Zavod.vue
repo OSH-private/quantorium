@@ -57,6 +57,7 @@ export default {
     if (homeStore.dialogueSeen) {
       this.showCharacter = false;
       this.dialogueFinished = true;
+      this.typedText = this.currentLine;
     } else {
       this.typeText();
     }
