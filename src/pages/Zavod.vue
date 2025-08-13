@@ -1,6 +1,6 @@
 <script>
 import { router } from "../router/index.js";
-import { useHomeStore } from "../stores/home";
+import { useHomeStore } from "../stores/index";
 
 // Импортируем эмоции
 import e1 from "../assets/e1.svg";
