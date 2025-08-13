@@ -16,7 +16,7 @@ export default {
   <div>
     <div class="div1">
       <p class="text1">
-        ФИНАЛ
+        Тут будет финал
       </p>
       <div class="sert">
         <img src="../../public/gifka.gif" class="norm"/>
@@ -24,7 +24,7 @@ export default {
       </div>
       <div class="div2">
         <button class="bot1" @click="Perehod1">
-          вернутся обратно
+          вернуться обратно
         </button>
       </div>
     </div>
