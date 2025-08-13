@@ -12,7 +12,7 @@ import { router } from "../router/index.js";
 export default {
   methods: {
     async Perehod1() {
-      await this.goFullscreen();
+      //await this.goFullscreen();
 
       if (!window.audio) {
         window.audio = new Audio("../../public/background.mp3");

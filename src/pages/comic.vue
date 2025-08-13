@@ -85,6 +85,8 @@ export default {
   cursor: pointer;
 }
 .comic-frame {
+  padding-bottom: 10px !important;
+  padding: 20px;
   pointer-events: none;
   display: flex;
   align-items: center;
