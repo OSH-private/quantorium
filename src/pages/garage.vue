@@ -10,6 +10,7 @@ import e5 from "../assets/e5.svg";
 import e6 from "../assets/e6.svg";
 import e7 from "../assets/e7.svg";
 import e8 from "../assets/e8.svg";
+import {useGarageStore} from "../stores/index.js";
 
 export default {
   data() {
@@ -50,7 +51,16 @@ export default {
   },
 
   mounted() {
-    this.typeText();
+    //useGarageStore().setDialogueSeen(false)
+    const garageStore = useGarageStore();
+
+    if (garageStore.dialogueSeen) {
+      this.showCharacter = false;
+      this.dialogueFinished = true;
+      this.typedText = this.currentLine;
+    } else {
+      this.typeText();
+    }
   },
 
   methods: {
@@ -68,6 +78,12 @@ export default {
       }, 40);
     },
 
+    handleClick() {
+      if (!this.dialogueFinished && this.showCharacter) {
+        this.advanceDialogue();
+      }
+    },
+
     advanceDialogue() {
       if (this.typingInterval) clearInterval(this.typingInterval);
 
@@ -81,6 +97,10 @@ export default {
       } else {
         this.isExiting = true;
         this.dialogueFinished = true;
+
+        const garageStore = useGarageStore();
+        garageStore.setDialogueSeen(true);
+
         setTimeout(() => {
           this.showCharacter = false;
         }, 1000);
@@ -95,10 +115,10 @@ export default {
 </script>
 
 <template>
-  <div class="div1" @click="advanceDialogue">
+  <div class="div1" @click="handleClick">
     <!-- Фон -->
     <img src="../assets/gar.svg" alt="Фон" class="background-img" />
-    <img
+    <img v-if="showCharacter"
         class="character-behind"
         :class="{ exit: isExiting }"
         :src="currentEmotion"

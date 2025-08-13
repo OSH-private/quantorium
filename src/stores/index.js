@@ -24,4 +24,16 @@ const useWiresStore = defineStore("wires", {
     }
 });
 
-export {useWiresStore, useHomeStore}
+const useGarageStore = defineStore("garage", {
+    state: () => ({
+        dialogueSeen: JSON.parse(localStorage.getItem("dialogueSeen") || "false")
+    }),
+    actions: {
+        setDialogueSeen(value) {
+            this.dialogueSeen = value;
+            localStorage.setItem("dialogueSeen", JSON.stringify(value));
+        }
+    }
+});
+
+export {useWiresStore, useHomeStore, useGarageStore}
