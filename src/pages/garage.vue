@@ -16,7 +16,7 @@ export default {
     return {
       dialogue: [
         { text: "уааааа!", emotion: e4 },
-        { text: "Ля какой грузовик.", emotion: e7 },
+        { text: "Смотри какой грузовик!", emotion: e7 },
         { text: "Кстати в нём лежит какая то батарейка.", emotion: e4 },
         { text: "Думаю это и есть то питание для ядра.", emotion: e1 },
         { text: "Тогда давай поможем грузовичку доехать!", emotion: e2 }
