@@ -17,7 +17,7 @@ export default {
         КВЕСТ 1
       </p>
       <p style="font-size: 4vw; color: #eef2ff">
-        тут типа будет головоломка
+        тут будет головоломка
       </p>
       <div class="div2">
         <button class="fnbt1" onclick="unlockFourthPage()">
