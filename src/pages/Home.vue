@@ -12,19 +12,6 @@ import { router } from "../router/index.js";
 export default {
   methods: {
     async Perehod1() {
-      //await this.goFullscreen();
-
-      if (!window.audio) {
-        window.audio = new Audio("../../public/background.mp3");
-        window.audio.loop = true;
-        window.audio.volume = 0.5;
-
-        try {
-          await window.audio.play();
-        } catch (err) {
-          console.warn("Автовоспроизведение не удалось:", err);
-        }
-      }
 
       router.push({ path: "/comic" });
     },

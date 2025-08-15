@@ -10,14 +10,7 @@ export default {
     return {
       currentFrame: 1,
       frames: [c1, c2, c3, c4],
-      initialVolume: 0.5, // 💡 здесь настраивается ИСХОДНАЯ громкость
-      volume: 0.5,         // будет установлена из initialVolume при запуске
     };
-  },
-  mounted() {
-    // Установим начальную громкость при монтировании компонента
-    this.volume = this.initialVolume;
-    this.updateVolume();
   },
   methods: {
     nextFrame() {
@@ -27,21 +20,13 @@ export default {
         router.push({ path: "/roadmap" });
       }
     },
-    updateVolume() {
-      if (window.audio) {
-        window.audio.volume = this.volume;
-      }
-    }
+
   }
 };
 </script>
 
 <template>
   <div class="divcom">
-    <!-- 🎚️ Слайдер громкости -->
-    <div class="volume-control">
-      <input type="range" min="0" max="1" step="0.01" v-model="volume" @input="updateVolume" />
-    </div>
 
     <div class="comic-grid" @click="nextFrame">
       <div v-if="currentFrame >= 1" class="comic-frame top-left">
