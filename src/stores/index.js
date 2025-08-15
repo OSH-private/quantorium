@@ -36,4 +36,25 @@ const useGarageStore = defineStore("garage", {
     }
 });
 
-export {useWiresStore, useHomeStore, useGarageStore}
+const useQuestsStore = defineStore('quests', {
+    state: () => ({
+        completedQuests: JSON.parse(localStorage.getItem('completedQuests') || '[]')
+    }),
+    actions: {
+        markQuestComplete(questId) {
+            if (!this.completedQuests.includes(questId)) {
+                this.completedQuests.push(questId)
+                localStorage.setItem('completedQuests', JSON.stringify(this.completedQuests))
+            }
+        },
+        cleanQuests() {
+            this.completedQuests = [] // очищаем массив
+            localStorage.setItem('completedQuests', JSON.stringify([])) // синхронизируем с localStorage
+        },
+        isQuestCompleted(questId) {
+            return this.completedQuests.includes(questId)
+        }
+    }
+})
+
+export {useWiresStore, useHomeStore, useQuestsStore, useGarageStore}

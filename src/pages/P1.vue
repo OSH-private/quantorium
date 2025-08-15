@@ -1,6 +1,8 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { router } from '../router/index.js'
+import { useQuestsStore } from '../stores/index.js'
+
 
 const wires = reactive([
   { color: 'red', start: { x: 0.1, y: 0.2 }, end: { x: 0.9, y: 0.8 } },
@@ -101,7 +103,9 @@ const resetConnections = () => {
 }
 
 const Perehod3 = () => {
-  router.push({ path: '/P2' })
+  const questsStore = useQuestsStore()
+  questsStore.markQuestComplete("P1") // пометили как завершённый
+  router.push({ path: '/quest2' })
 }
 
 onMounted(() => {

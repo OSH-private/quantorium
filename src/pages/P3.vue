@@ -1,6 +1,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { router } from '../router/index.js'
+import {useQuestsStore} from "../stores/index.js";
 
 const VIEWBOX_WIDTH = 600
 const VIEWBOX_HEIGHT = 300
@@ -109,7 +110,11 @@ const reset = () => {
   switchedColor.value = null
 }
 
-const Perehod4 = () => router.push({ path: '/P4' })
+const Perehod4 = () => {
+  const questsStore = useQuestsStore()
+  questsStore.markQuestComplete("P3") // пометили как завершённый
+  router.push({ path: '/quest2' })
+}
 
 onMounted(() => {
   document.addEventListener('mousemove', updateDrag)

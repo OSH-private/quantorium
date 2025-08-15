@@ -11,17 +11,27 @@ import e6 from "../assets/e6.svg";
 import e7 from "../assets/e7.svg";
 import e8 from "../assets/e8.svg";
 import { useWiresStore} from "../stores/index.js";
+import {useQuestsStore} from "../stores/index.js";
+
 
 export default {
   data() {
     return {
-      dialogue: [
+      dialogueIntro: [
         { text: "Ого!", emotion: e4 },
         { text: "Даже свет не горит.", emotion: e7 },
         { text: "Похоже что с проводами что то случилось при перенапряжении.", emotion: e2 },
         { text: "Давай посмотрим и попробуем починить.", emotion: e1 },
         { text: "Начни с любого щитка, а я тебе помогу!", emotion: e2 }
       ],
+      dialogueSuccess:[
+        { text: "Ого!", emotion: e4},
+        { text: "У тебя получилось!", emotion: e4 },
+        { text: "Электричество восстановлено, можем идти дальше.", emotion: e2 },
+      ],
+      questsStore: useQuestsStore(),
+      activeDialogue: [],
+      activeDialogueId: "intro",
       dialogueIndex: 0,
       typedText: "",
       typingInterval: null,
@@ -34,10 +44,12 @@ export default {
 
   computed: {
     currentLine() {
-      return this.dialogue[this.dialogueIndex].text;
+      const line = this.activeDialogue[this.dialogueIndex];
+      return line ? line.text : "";
     },
     currentEmotion() {
-      return this.dialogue[this.dialogueIndex].emotion;
+      const line = this.activeDialogue[this.dialogueIndex];
+      return line ? line.emotion : e1;
     },
     buttonsDisabled() {
       return !this.dialogueFinished || this.typedText !== this.currentLine;
@@ -51,27 +63,49 @@ export default {
   },
 
   mounted() {
-    //useWiresStore().setDialogueSeen(false)
+    //useQuestsStore().cleanQuests() //очистка пройденных заданий
+    //localStorage.setItem("quest2_success_seen", "false"); //разблокировать повторный конечный диалог
+    //useWiresStore().setDialogueSeen(false) //разблокировать повторный входной диалог
+
+
     const WiresStore = useWiresStore();
 
-    if (WiresStore.dialogueSeen) {
+    const allDone = ['P1', 'P2', 'P3', 'P4'].every(id => this.questsStore.isQuestCompleted(id));
+    const successSeen = JSON.parse(localStorage.getItem("quest2_success_seen") || "false");
+
+    if (allDone && !successSeen) {
+      this.startDialogue(this.dialogueSuccess, "success"); // <-- передаём сам массив
+    } else if (WiresStore.dialogueSeen) {
+      // Первый диалог уже показывали раньше — сразу разблокируем управление без показа
       this.showCharacter = false;
       this.dialogueFinished = true;
       this.typedText = this.currentLine;
     } else {
-      this.typeText();
+      // Первый визит — запускаем вступительный диалог
+      this.startDialogue(this.dialogueIntro, "intro"); // <-- передаём сам массив
     }
   },
 
   methods: {
+    startDialogue(dialogArray, id = "intro") {
+      this.activeDialogue = dialogArray;
+      this.activeDialogueId = id;
+      this.dialogueIndex = 0;
+      this.typedText = "";
+      this.dialogueFinished = false;
+      this.isExiting = false;
+      this.showCharacter = true;
+      this.typeText();
+    },
     typeText() {
       clearInterval(this.typingInterval);
       this.typedText = "";
       let i = 0;
+      const line = this.currentLine;
+
       this.typingInterval = setInterval(() => {
-        if (i < this.currentLine.length) {
-          this.typedText += this.currentLine[i];
-          i++;
+        if (i < line.length) {
+          this.typedText += line[i++];
         } else {
           clearInterval(this.typingInterval);
         }
@@ -92,14 +126,19 @@ export default {
         return;
       }
 
-      if (this.dialogueIndex < this.dialogue.length - 1) {
+      if (this.dialogueIndex < this.activeDialogue.length - 1) {
         this.dialogueIndex++;
       } else {
         this.isExiting = true;
         this.dialogueFinished = true;
 
         const wiresStore = useWiresStore();
-        wiresStore.setDialogueSeen(true);
+
+        if (this.activeDialogueId === "intro") {
+          wiresStore.setDialogueSeen(true);
+        } else if (this.activeDialogueId === "success") {
+          localStorage.setItem("quest2_success_seen", "true");
+        }
 
         setTimeout(() => {
           this.showCharacter = false;
@@ -145,16 +184,16 @@ export default {
 
     <!-- Контуры квестов -->
     <div class="quest-images">
-      <div class="quest-container" :class="{ hover: hoverQuest === 1 }">
+      <div class="quest-container" :class="{ hover: hoverQuest === 1 }" :style="{ opacity: questsStore.isQuestCompleted('P1') ? 0 : 1 }">
         <img src="../assets/z1.svg" alt="Контур 1" class="quest-contour" />
       </div>
-      <div class="quest-container" :class="{ hover: hoverQuest === 2 }">
+      <div class="quest-container" :class="{ hover: hoverQuest === 2 }" :style="{ opacity: questsStore.isQuestCompleted('P2') ? 0 : 1 }">
         <img src="../assets/z2.svg" alt="Контур 2" class="quest-contour" />
       </div>
-      <div class="quest-container" :class="{ hover: hoverQuest === 3 }">
+      <div class="quest-container" :class="{ hover: hoverQuest === 3 }" :style="{ opacity: questsStore.isQuestCompleted('P3') ? 0 : 1 }">
         <img src="../assets/z3.svg" alt="Контур 3" class="quest-contour" />
       </div>
-      <div class="quest-container" :class="{ hover: hoverQuest === 4 }">
+      <div class="quest-container" :class="{ hover: hoverQuest === 4 }" :style="{ opacity: questsStore.isQuestCompleted('P4') ? 0 : 1 }">
         <img src="../assets/z4.svg" alt="Контур 4" class="quest-contour" />
       </div>
     </div>
@@ -179,28 +218,28 @@ export default {
           @mouseenter="setHoverQuest(1)"
           @mouseleave="clearHoverQuest"
           @click.stop="Perehod2"
-          :disabled="buttonsDisabled"
+          :disabled="buttonsDisabled || questsStore.isQuestCompleted('P1')"
       ></button>
       <button
           class="invisible-btn btn-quest2"
           @mouseenter="setHoverQuest(2)"
           @mouseleave="clearHoverQuest"
           @click.stop="Perehod3"
-          :disabled="buttonsDisabled"
+          :disabled="buttonsDisabled || questsStore.isQuestCompleted('P2')"
       ></button>
       <button
           class="invisible-btn btn-quest3"
           @mouseenter="setHoverQuest(3)"
           @mouseleave="clearHoverQuest"
           @click.stop="PerehodG"
-          :disabled="buttonsDisabled"
+          :disabled="buttonsDisabled || questsStore.isQuestCompleted('P3')"
       ></button>
       <button
           class="invisible-btn btn-quest4"
           @mouseenter="setHoverQuest(4)"
           @mouseleave="clearHoverQuest"
           @click.stop="Perehod4"
-          :disabled="buttonsDisabled"
+          :disabled="buttonsDisabled || questsStore.isQuestCompleted('P4')"
       ></button>
     </div>
 
@@ -260,12 +299,12 @@ export default {
   top: 0;
   left: 0;
   object-fit: cover;
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.4s ease;
 }
 
 .quest-container.hover .quest-contour {
-  opacity: 1;
+  opacity: 0.5;
 }
 
 /* Персонаж позади диалога */
