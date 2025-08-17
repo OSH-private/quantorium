@@ -4,6 +4,57 @@ import { router } from '../router/index.js'
 import { useQuestsStore } from '../stores/index.js'
 
 
+const cornerRadius = 5
+
+const computePath = (fromIndex, toIndex) => {
+  const startX = wires[fromIndex].start.x * VIEWBOX_WIDTH
+  const startY = wires[fromIndex].start.y * VIEWBOX_HEIGHT
+  const endX = wires[toIndex].end.x * VIEWBOX_WIDTH
+  const endY = wires[toIndex].end.y * VIEWBOX_HEIGHT
+  const midX = (startX + endX) / 2
+  const verticalDir = endY >= startY ? 1 : -1
+
+  return `M ${startX} ${startY}
+          L ${midX - cornerRadius} ${startY}
+          Q ${midX} ${startY} ${midX} ${startY + cornerRadius * verticalDir}
+          L ${midX} ${endY - cornerRadius * verticalDir}
+          Q ${midX} ${endY} ${midX + cornerRadius} ${endY}
+          L ${endX} ${endY}`
+}
+
+// Для активного провода (dragging)
+const computeActivePath = () => {
+  if (dragging.index === null) return ''
+  const startX = wires[dragging.index].start.x * VIEWBOX_WIDTH
+  const startY = wires[dragging.index].start.y * VIEWBOX_HEIGHT
+  const endX = dragging.x * VIEWBOX_WIDTH
+  const endY = dragging.y * VIEWBOX_HEIGHT
+  const midX = (startX + endX) / 2
+  const verticalDir = endY >= startY ? 1 : -1
+
+  return `M ${startX} ${startY}
+          L ${midX - cornerRadius} ${startY}
+          Q ${midX} ${startY} ${midX} ${startY + cornerRadius * verticalDir}
+          L ${midX} ${endY - cornerRadius * verticalDir}
+          Q ${midX} ${endY} ${midX + cornerRadius} ${endY}
+          L ${endX} ${endY}`
+}
+
+const x1 = computed(() => {
+  if (dragging.index === null) return 0
+  return wires[dragging.index].start.x * VIEWBOX_WIDTH
+})
+
+const y1 = computed(() => {
+  if (dragging.index === null) return 0
+  return wires[dragging.index].start.y * VIEWBOX_HEIGHT
+})
+
+const midX = computed(() => {
+  if (dragging.index === null) return 0
+  return (x1.value + dragging.x * VIEWBOX_WIDTH) / 2
+})
+
 const wires = reactive([
   { color: 'red', start: { x: 0.1, y: 0.2 }, end: { x: 0.9, y: 0.8 } },
   { color: 'blue', start: { x: 0.1, y: 0.5 }, end: { x: 0.9, y: 0.2 } },
@@ -138,28 +189,24 @@ onMounted(() => {
       </g>
 
       <!-- Протянутые линии -->
-      <line
+      <path
           v-for="(conn, i) in connections"
           :key="i"
-          :x1="wires[conn.from].start.x * VIEWBOX_WIDTH"
-          :y1="wires[conn.from].start.y * VIEWBOX_HEIGHT"
-          :x2="wires[conn.to].end.x * VIEWBOX_WIDTH"
-          :y2="wires[conn.to].end.y * VIEWBOX_HEIGHT"
+          :d="computePath(conn.from, conn.to)"
           stroke="gray"
-          stroke-width="30"
+          stroke-width="20"
           stroke-linecap="round"
+          fill="none"
       />
 
       <!-- Активная линия -->
-      <line
+      <path
           v-if="dragging.active"
-          :x1="wires[dragging.index].start.x * VIEWBOX_WIDTH"
-          :y1="wires[dragging.index].start.y * VIEWBOX_HEIGHT"
-          :x2="dragging.x * VIEWBOX_WIDTH"
-          :y2="dragging.y * VIEWBOX_HEIGHT"
+          :d="computeActivePath()"
           stroke="gray"
-          stroke-dasharray="5,5"
-          stroke-width="5"
+          stroke-width="15"
+          stroke-dasharray="10,5"
+          fill="none"
       />
     </svg>
     <div class="controls">

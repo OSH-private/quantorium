@@ -1,6 +1,13 @@
 <template>
   <div class="container">
-    <img src="../assets/qu3.svg" alt="Фон" class="background-img" />
+    <div class="map-wrapper">
+      <div class="controls-panel">
+        <button @click="addCommand('up')">↑</button>
+        <button @click="addCommand('down')">↓</button>
+        <button @click="addCommand('left')">←</button>
+        <button @click="addCommand('right')">→</button>
+      </div>
+    <img src="/public/car_without_back.png" alt="Фон" class="background-img" />
 
     <!-- Отдельное отображение bat.svg -->
     <img
@@ -26,6 +33,7 @@
             class="command-icon"
             :class="{ 'fade-out': index < currentCommandIndex }"
             :style="{ transitionDelay: (index * 0.1) + 's' }"
+            @click.stop.prevent="removeCommand(index)"
         >
           <img :src="getCommandImage(cmd)" :alt="cmd" />
         </div>
@@ -35,14 +43,14 @@
 
     <button @click="start" class="start-btn">Старт</button>
 
-    <div class="maze-grid" :style="{ width: gridWidth + 'px', height: gridHeight + 'px' }">
-      <div v-for="(row, y) in maze" :key="'row-' + y" class="row">
-        <div
-            v-for="(cell, x) in row"
-            :key="'cell-' + y + '-' + x"
-            :class="['cell', cellClass(cell), isCarHere(x, y) ? 'car-cell' : '']"
-            :style="cellStyle"
-        />
+      <div class="maze-grid">
+        <template v-for="(row, y) in maze" :key="'row-'+y">
+          <div
+              v-for="(cell, x) in row"
+              :key="'cell-'+y+'-'+x"
+              :class="['cell', cellClass(cell)]"
+          />
+        </template>
       </div>
 
       <!-- Машинка -->
@@ -55,12 +63,7 @@
       />
     </div>
 
-    <div class="controls-panel">
-      <button @click="addCommand('up')">↑</button>
-      <button @click="addCommand('down')">↓</button>
-      <button @click="addCommand('left')">←</button>
-      <button @click="addCommand('right')">→</button>
-    </div>
+
 
     <div v-if="showModal" class="modal">
       <div class="modal-content">
@@ -68,11 +71,12 @@
         <button @click="closeModal">OK</button>
       </div>
     </div>
-  </div>
+    </div>
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
+
 
 // Командные изображения
 import upImage from '../assets/cn1.svg'
@@ -85,11 +89,9 @@ import carImageBefore from '../assets/car.svg'
 import carImageAfter from '../assets/car2.svg'
 
 // Размеры
-const tileSize = 100
+
 const mazeWidth = 12
 const mazeHeight = 7
-const gridWidth = computed(() => tileSize * mazeWidth)
-const gridHeight = computed(() => tileSize * mazeHeight)
 
 // Лабиринт
 const maze = [
@@ -119,6 +121,7 @@ const currentCommandIndex = ref(0)
 const queueContainer = ref(null)
 const isDragging = ref(false)
 const startY = ref(0)
+const startX= ref(0)
 const scrollTop = ref(0)
 
 const carImage = computed(() => passedCheckpoint.value ? carImageAfter : carImageBefore)
@@ -127,34 +130,59 @@ const carImage = computed(() => passedCheckpoint.value ? carImageAfter : carImag
 const checkpointPosition = computed(() => {
   for (let y = 0; y < mazeHeight; y++) {
     for (let x = 0; x < mazeWidth; x++) {
-      if (maze[y][x] === 3) {
-        return { x, y }
-      }
+      if (maze[y][x] === 3) return { x, y }
     }
   }
   return { x: -1, y: -1 }
 })
 
 const checkpointStyle = computed(() => ({
-  top: (120 + checkpointPosition.value.y * tileSize) + 'px',
-  left: (570 + checkpointPosition.value.x * tileSize) + 'px',
-  width: tileSize + 'px',
-  height: tileSize + 'px'
-}))
-
-const cellStyle = computed(() => ({
-  width: tileSize + 'px',
-  height: tileSize + 'px'
+  top: (12 + checkpointPosition.value.y * (63 / mazeHeight)) + '%',
+  left: (26 + checkpointPosition.value.x * (63 / mazeHeight)) + '%',
+  width: (63 / mazeWidth) + '%',
+  height: (63 / mazeHeight) + '%',
 }))
 
 const carStyle = computed(() => ({
-  top: (posY.value * tileSize) + 'px',
-  left: (posX.value * tileSize) + 'px',
-  width: tileSize + 'px',
-  height: tileSize + 'px',
-  transform: 'rotate(' + rotation.value + 'deg)',
+  top: (12 + posY.value * (63 / mazeHeight)) + '%',
+  left: (29.5 + posX.value * (63 / mazeWidth)) + '%',
+  width: (63 / mazeWidth) + '%',
+  height: (63 / mazeHeight) + '%',
+  transform: `rotate(${rotation.value}deg)`,
   transition: 'transform 0.3s ease-out, left 0.3s ease-out, top 0.3s ease-out'
 }))
+
+const removeCommand = (index) => {
+  commandQueue.value.splice(index, 1)
+
+  // Подкрутить прокрутку после удаления (опционально)
+  nextTick(() => {
+    if (queueContainer.value) {
+      queueContainer.value.scrollTop = queueContainer.value.scrollHeight
+    }
+  })
+}
+
+async function returnToStart() {
+  const start = { x: targetX.value, y: targetY.value }
+  findStartPosition() // получаем стартовые координаты в posX/Y и targetX/Y
+  const steps = 15
+  const fromX = posX.value
+  const fromY = posY.value
+  const toX = targetX.value
+  const toY = targetY.value
+
+  for (let i = 0; i <= steps; i++) {
+    const progress = i / steps
+    posX.value = fromX + (toX - fromX) * progress
+    posY.value = fromY + (toY - fromY) * progress
+    await new Promise(resolve => setTimeout(resolve, 30))
+  }
+
+  currentCommandIndex.value = 0
+  commandQueue.value = []
+  isMoving.value = false
+}
 
 function getCommandImage(cmd) {
   return {
@@ -254,71 +282,54 @@ async function start() {
 
 async function execute(queue) {
   if (queue.length === 0) {
+    const finishCell = maze[targetY.value][targetX.value]
+    if (finishCell !== 4 || !passedCheckpoint.value) {
+      await new Promise(resolve => setTimeout(resolve, 500))
+      showNotification('Попробуй снова!')
+      await returnToStart()
+    }
     commandQueue.value = []
     return
   }
 
   const cmd = queue.shift()
-  targetRotation.value = {
-    'up': 0,
-    'right': 90,
-    'down': 180,
-    'left': 270
-  }[cmd]
-
+  targetRotation.value = { 'up': 0, 'right': 90, 'down': 180, 'left': 270 }[cmd]
   rotation.value = targetRotation.value
   await new Promise(resolve => setTimeout(resolve, 300))
 
-  let path = []
-  let currentX = targetX.value
-  let currentY = targetY.value
+  let nextX = targetX.value
+  let nextY = targetY.value
+  if (cmd === 'up') nextY--
+  else if (cmd === 'down') nextY++
+  else if (cmd === 'left') nextX--
+  else if (cmd === 'right') nextX++
 
-  while (true) {
-    let nextX = currentX
-    let nextY = currentY
-
-    if (cmd === 'up') nextY--
-    else if (cmd === 'down') nextY++
-    else if (cmd === 'left') nextX--
-    else if (cmd === 'right') nextX++
-
-    if (nextX < 0 || nextY < 0 || nextX >= mazeWidth || nextY >= mazeHeight) break
-    if (maze[nextY][nextX] === 1) break
-
-    path.push({ x: nextX, y: nextY })
-    currentX = nextX
-    currentY = nextY
-  }
-
-  if (path.length === 0) {
-    currentCommandIndex.value++
-    await execute(queue)
-    return
-  }
-
-  for (const point of path) {
-    targetX.value = point.x
-    targetY.value = point.y
-
+  // Проверка на границы и стены
+  if (nextX >= 0 && nextY >= 0 && nextX < mazeWidth && nextY < mazeHeight && maze[nextY][nextX] !== 1) {
+    const fromX = posX.value
+    const fromY = posY.value
+    targetX.value = nextX
+    targetY.value = nextY
     const steps = 10
     for (let i = 0; i <= steps; i++) {
       const progress = i / steps
-      posX.value = posX.value + (targetX.value - posX.value) * progress
-      posY.value = posY.value + (targetY.value - posY.value) * progress
+      posX.value = fromX + (targetX.value - fromX) * progress
+      posY.value = fromY + (targetY.value - fromY) * progress
       await new Promise(resolve => setTimeout(resolve, 30))
     }
 
-    const cell = maze[point.y][point.x]
-    if (cell === 3) {
-      passedCheckpoint.value = true
-    } else if (cell === 4) {
+    const cell = maze[targetY.value][targetX.value]
+    if (cell === 3) passedCheckpoint.value = true
+    else if (cell === 4) {
       if (passedCheckpoint.value) {
         showNotification('ПОБЕДА! Вы успешно прошли уровень!')
+        reset()
+        return
       } else {
         showNotification('Нужно сначала проехать через чекпоинт!')
+        await returnToStart()
+        return
       }
-      reset()
-      return
     }
   }
 
@@ -333,32 +344,47 @@ findStartPosition()
 
 <style scoped>
 .container {
+  background-image: url("public/fon_car.svg");
+  justify-content: center;
+  display: flex;
   position: relative;
-  width: 1920px;
-  height: 1080px;
+  width: 100vw;
+  height: 100vh;
   overflow: hidden;
   margin: 0 auto;
   user-select: none;
+  transform-origin: top left;
 }
 
 .background-img {
   position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  z-index: 15;
+  object-fit: fill; /* контейнер уже держит нужную пропорцию */
+  z-index: 1;
   pointer-events: none;
 }
 
 .maze-grid {
   position: absolute;
-  top: 126px;
-  left: 570px;
-  background: transparent;
-  border: none;
-  z-index: 16;
+  left: 29.5%;
+  top: 12%;
+  width: 63%;
+  height: 63%;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  z-index: 2;
+  grid-template-rows: repeat(7, 1fr);
 }
-
+.map-wrapper {
+  position: relative;
+  width: 100vw;
+  height: calc(100vw * (7 / 12)); /* высота по пропорции */
+  max-height: 100vh;
+  max-width: calc(100vh * (12 / 7));
+  margin: auto;
+}
 .row {
   display: flex;
   user-select: none;
@@ -366,40 +392,42 @@ findStartPosition()
 
 .cell {
   box-sizing: border-box;
-  border: none;
-  user-select: none;
+  border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 .empty, .wall, .start, .checkpoint, .finish {
   background-color: transparent;
-  border: none;
+}
+
+.start-btn, .controls-panel {
+  z-index: 100;
 }
 
 .car {
   position: absolute;
-  transition: all 0.3s ease;
-  z-index: 20;
+  z-index: 3;
   transform-origin: center;
   user-select: none;
+  pointer-events: none;
 }
 
 .global-checkpoint-img {
   position: absolute;
-  z-index: 25;
+  z-index: 4;
   animation: pulse 1.2s infinite ease-in-out;
   pointer-events: none;
 }
 
 .queue-display {
-  mask-image: linear-gradient(to top, transparent 0%, black 3%, black 98%, transparent 100%);
   position: absolute;
-  top: 126px;
-  left: 200px;
-  width: 300px;
-  height: 720px;
-  z-index: 17;
+  top: 11%;
+  left: 10%;
+  width: 18%;
+  height: 66%;
+  z-index: 5;
   background: transparent;
   overflow: hidden;
+  mask-image: linear-gradient(to top, transparent 0%, black 3%, black 98%, transparent 100%);
 }
 
 .queue-content {
@@ -409,60 +437,47 @@ findStartPosition()
   align-items: center;
   gap: 10px;
   overflow-y: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  overflow-x: hidden;
+  scrollbar-width: auto;
+  -ms-overflow-style: auto;
   padding: 10px;
   box-sizing: border-box;
 }
-
 .queue-content::-webkit-scrollbar {
-  display: none;
+  width: 0.8vw;          /* ширина вертикального скролла */
 }
 
-.command-icon {
-  width: 285px;
-  height: 92px;
-  flex-shrink: 0;
-  pointer-events: none;
-  user-select: none;
-  opacity: 1;
-  transition: opacity 0.3s ease-out;
+.queue-content::-webkit-scrollbar-track {
+  background: transparent; /* фон дорожки */
 }
 
-.command-icon.fade-out {
-  opacity: 0;
+.queue-content::-webkit-scrollbar-thumb {
+  background-color: rgba(250,250,250,0.6); /* цвет ползунка */
+  border-radius: 4px;
 }
 
-.command-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  pointer-events: none;
-  user-select: none;
+.command-icon { width: 90%; height: 14%; border-radius: 6px; padding: 0 5px; cursor: pointer; flex-shrink: 0; opacity: 1; transition: opacity 0.3s ease-out; }
+.command-icon.fade-out { opacity: 0; }
+.command-icon img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.command-icon:hover {
+  background-color: red;
 }
 
-.fade-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 50px;
-  pointer-events: none;
-  z-index: 11;
-}
+.fade-overlay { position: absolute; top: 0; left: 0; right: 0; height: 50px; pointer-events: none; z-index: 6; }
 
 .start-btn {
   position: absolute;
-  top: 861px;
-  left: 146px;
-  height: 106px;
-  width: 357px;
+  opacity: 0;
+  top: 80%;
+  left: 7.5%;
+  height: 10%;
+  width: 19%;
   cursor: pointer;
   background: #4CAF50;
   color: white;
   border: none;
   border-radius: 6px;
-  z-index: 10;
+  z-index: 6;
   user-select: none;
 }
 
@@ -472,25 +487,30 @@ findStartPosition()
 
 .controls-panel {
   position: absolute;
-  top: 870px;
-  left: 565px;
-  display: flex;
-  gap: 23px;
-  background: rgba(255, 255, 255, 0.8);
+  opacity: 0;
+  top: 79.5%;
+  left: 61%;
+  transform: translateX(-50%);
+  height: 9%;
+  width: 63%;
+  justify-content: space-between;
+  display: flex
+;
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 8px;
   border: 1px solid #ccc;
   z-index: 10;
   user-select: none;
+  padding: 6px;
 }
 
 .controls-panel button {
-  height: 92px;
-  width: 285px;
+  height: 100%;
+  width: 24%;
   cursor: pointer;
   background: #f0f0f0;
   border: 1px solid #ccc;
   border-radius: 6px;
-  min-width: 60px;
   user-select: none;
 }
 
