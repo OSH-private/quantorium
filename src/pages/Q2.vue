@@ -244,12 +244,10 @@ export default {
     </div>
 
     <!-- ФИНАЛ -->
-    <div class="final-btn">
-      <button
-          @click.stop="Perehod5"
-          :disabled="buttonsDisabled"
-      >НАЗАД</button>
-    </div>
+    <button @click.stop="Perehod5"
+         :disabled="buttonsDisabled" class="final-btn">
+      <p>НАЗАД</p>
+    </button>
   </div>
 </template>
 
@@ -403,26 +401,35 @@ export default {
   height: 19%;
 }
 
-/* Кнопка ФИНАЛ ниже диалога */
-.final-btn {
-  position: absolute;
-  bottom: 5vh;
-  left: 90%;
-  transform: translateX(-50%);
-  z-index: 50;
+.final-btn p{
+  font-size: max(6vh, 3vw);
+  height: 100%;
+  text-align: center;
+  margin: 0;
+  width: 100%;
 }
 
-.final-btn button {
-  font-size: 2vw;
+.final-btn {
+  left: 39vw;
+  position: absolute;
+  bottom: 6vh;
+  z-index: 50;
+  transition: all 0.3s ease;
+  width: 22vw;
+  height: max(10vh, 6vw);
   padding: 1vw 2vw;
-  background-color: rgba(230, 210, 170, 0.9);
-  border: none;
+  background-color: rgba(230, 210, 170, 1);
+  color: white;
+  border: 4px solid rgb(200,150,110,9) ;
   cursor: pointer;
   border-radius: 12px;
-  transition: opacity 0.3s;
 }
 
-.final-btn button:disabled {
+.final-btn:hover{
+  scale:120%;
+}
+
+.final-btn:disabled {
   opacity: 0.5;
   cursor: default;
 }

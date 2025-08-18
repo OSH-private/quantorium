@@ -87,6 +87,7 @@ import rightImage from '../assets/cn4.svg'
 // Машинки
 import carImageBefore from '../assets/car.svg'
 import carImageAfter from '../assets/car2.svg'
+import {router} from "../router/index.js";
 
 // Размеры
 
@@ -213,6 +214,9 @@ function handleDrag(e) {
 function endDrag() {
   isDragging.value = false
 }
+function  Perehod(){
+  router.push({ path: "/roadmap" });
+}
 
 function cellClass(cell) {
   return {
@@ -324,6 +328,7 @@ async function execute(queue) {
       if (passedCheckpoint.value) {
         showNotification('ПОБЕДА! Вы успешно прошли уровень!')
         reset()
+        Perehod()
         return
       } else {
         showNotification('Нужно сначала проехать через чекпоинт!')

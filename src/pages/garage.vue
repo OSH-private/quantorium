@@ -129,12 +129,13 @@ export default {
     <div v-if="showCharacter" class="dialogue-container" :class="{ exit: isExiting }">
       <p>{{ typedText }}</p>
     </div>
-    <div class="final-btn">
-      <button
+      <button class="final-btn"
           @click.stop="Perehod4"
           :disabled="buttonsDisabled"
-      >НАЧАТЬ</button>
-    </div>
+      ><p>
+        НАЧАТЬ
+      </p>
+      </button>
   </div>
 </template>
 
@@ -207,26 +208,35 @@ export default {
   max-width: 100%;
   margin: 0;
 }
+.final-btn p{
+  font-size: max(6vh, 3vw);
+  height: 100%;
+  text-align: center;
+  margin: 0;
+  width: 100%;
+}
 
 .final-btn {
+  left: 39vw;
   position: absolute;
-  bottom: 5vh;
-  left: 90%;
-  transform: translateX(-50%);
+  bottom: 6vh;
   z-index: 50;
-}
-
-.final-btn button {
-  font-size: 2vw;
+  transition: all 0.3s ease;
+  width: 22vw;
+  height: max(10vh, 6vw);
   padding: 1vw 2vw;
   background-color: rgba(230, 210, 170, 0.9);
-  border: none;
+  color: white;
+  border: 4px solid rgb(200,150,110,9) ;
   cursor: pointer;
   border-radius: 12px;
-  transition: opacity 0.3s;
 }
 
-.final-btn button:disabled {
+.final-btn:hover{
+  scale:120%;
+}
+
+.final-btn:disabled {
   opacity: 0.5;
   cursor: default;
 }
