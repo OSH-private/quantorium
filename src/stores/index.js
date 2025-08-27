@@ -36,6 +36,29 @@ const useGarageStore = defineStore("garage", {
     }
 });
 
+const useItemStore = defineStore("items", {
+    state: () => ({
+        // { detail1: true, detail2: true, ... }
+        foundItems: JSON.parse(localStorage.getItem("foundItems") || "{}")
+    }),
+    getters: {
+        isItemFound: (state) => (id) => state.foundItems[id] === true
+    },
+    actions: {
+        markItemFound(id) {
+            if (!this.foundItems[id]) {
+                this.foundItems[id] = true;
+                localStorage.setItem("foundItems", JSON.stringify(this.foundItems));
+            }
+        },
+        resetItems() {
+            this.foundItems = {};
+            localStorage.removeItem("foundItems");
+        }
+    }
+});
+
+
 const useQuestsStore = defineStore('quests', {
     state: () => ({
         completedQuests: JSON.parse(localStorage.getItem('completedQuests') || '[]')
@@ -57,4 +80,4 @@ const useQuestsStore = defineStore('quests', {
     }
 })
 
-export {useWiresStore, useHomeStore, useQuestsStore, useGarageStore}
+export {useWiresStore, useHomeStore, useQuestsStore, useGarageStore, useItemStore}
