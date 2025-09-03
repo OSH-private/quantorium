@@ -294,6 +294,8 @@ export default {
   height: 60%;
 }
 .inventory{
+  left: 35%;
+  right: 35%;
   padding-right: 5px;
   padding-left: 5px;
   bottom: 3%;
