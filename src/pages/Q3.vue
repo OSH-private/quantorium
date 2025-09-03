@@ -349,7 +349,7 @@ findStartPosition()
 
 <style scoped>
 .container {
-  background-image: url("public/fon_car.svg");
+  background-image: url("/fon_car.svg");
   justify-content: center;
   display: flex;
   position: relative;
