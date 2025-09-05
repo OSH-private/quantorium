@@ -1,22 +1,50 @@
 <script>
 import {router} from "../router/index.js";
-import {useItemStore} from "../stores/index.js";
-import garage from "./garage.vue";
+import {useGarageStore, useItemStore, useWiresStore} from "../stores/index.js";
 import HorBar from "../components/HorBar.vue";
+// Импорт эмоций
+import e1 from "../assets/e1.svg";
+import e2 from "../assets/e2.svg";
+import e3 from "../assets/e3.svg";
+import e4 from "../assets/e4.svg";
+import e5 from "../assets/e5.svg";
+import e6 from "../assets/e6.svg";
+import e7 from "../assets/e7.svg";
+import e8 from "../assets/e8.svg";
 
 
 export default {
   components:{HorBar},
   data(){
     return{
+      //для диалога
+      dialogueIntro: [
+        { text: "О нет, робот сломан!", emotion: e4 },
+        { text: "Кажется ему не хватает деталей", emotion: e4 },
+        { text: "Рядом есть склад, возможно там мы найдем что-то полезное", emotion: e1 },
+        { text: "Попробуй отыскать все и подставить в робота", emotion: e1 },
+      ],
+      dialogueSuccess:[
+        { text: "Ого!", emotion: e4},
+        { text: "У тебя получилось!", emotion: e4 },
+        { text: "Робот как новеньких, можем идти дальше", emotion: e2 },
+      ],
+      activeDialogue: [],
+      activeDialogueId: "intro",
+      dialogueIndex: 0,
+      typedText: "",
+      typingInterval: null,
+      showCharacter: true,
+      isExiting: false,
+      dialogueFinished: false,
 
+      //остальное
       garage:false,
       itemStore: useItemStore(),
       draggedItem: null,
       foundItems: {},
       counter: 0,
       naming: "",
-
       robotSlots: [
         { id: "detail1", top: "-4%", left: "29%", width: "30%",  item: null },
         { id: "detail2", top: "50%", left: "-9%", width: "24%", item: null },
@@ -72,6 +100,10 @@ export default {
       const audio = new Audio('../public/found.mp3')
       audio.play()
     },
+    playRobotRepaired() {
+      const audio = new Audio('../public/completed.mp3')
+      audio.play()
+    },
     findItem(id) {
       this.itemStore.markItemFound(id)
       this.playSuccessSound()
@@ -79,26 +111,78 @@ export default {
     isFound(id) {
       return this.itemStore.isItemFound(id)
     },
-    addRobot() {
-      const idx = this.robotSlots.findIndex(s => s === null);
-      if (idx !== -1) {
-        // можно поставить любой ненулевой объект/значение
-        this.robotSlots[idx] = { id: `item${++this.counter}` };
-        console.log('added at', idx, this.robotSlots);
+    startDialogue(dialogArray, id = "intro") {
+      this.activeDialogue = dialogArray;
+      this.activeDialogueId = id;
+      this.dialogueIndex = 0;
+      this.typedText = "";
+      this.dialogueFinished = false;
+      this.isExiting = false;
+      this.showCharacter = true;
+      this.typeText();
+    },
+    typeText() {
+      clearInterval(this.typingInterval);
+      this.typedText = "";
+      let i = 0;
+      const line = this.currentLine;
+
+      this.typingInterval = setInterval(() => {
+        if (i < line.length) {
+          this.typedText += line[i++];
+        } else {
+          clearInterval(this.typingInterval);
+        }
+      }, 40);
+    },
+
+    handleClick() {
+      if (!this.dialogueFinished && this.showCharacter) {
+        this.advanceDialogue();
+      }
+    },
+
+    advanceDialogue() {
+      if (this.typingInterval) clearInterval(this.typingInterval);
+
+      if (this.typedText !== this.currentLine) {
+        this.typedText = this.currentLine;
+        return;
+      }
+
+      if (this.dialogueIndex < this.activeDialogue.length - 1) {
+        this.dialogueIndex++;
       } else {
-        console.log('все слоты заполнены');
+        this.isExiting = true;
+        this.dialogueFinished = true;
+
+
+
+        if (this.activeDialogueId === "intro") {
+          this.itemStore.setDialogueSeen(true);
+        } else if (this.activeDialogueId === "success") {
+          localStorage.setItem("quest1_success_seen", "true");
+          setTimeout(() => {
+            this.Perehod1();
+          }, 1000);
+        }
+
+        setTimeout(() => {
+          this.showCharacter = false;
+        }, 1000);
       }
     },
 
   },
-  mounted() {
-    //this.itemStore.resetItems() //для возвращения всех найденных вещей обратно
-    const saved = localStorage.getItem("foundItems");
-    if (saved) {
-      this.itemStore.foundItems = JSON.parse(saved);
-    }
-  },
   computed: {
+    currentLine() {
+      const line = this.activeDialogue[this.dialogueIndex];
+      return line ? line.text : "";
+    },
+    currentEmotion() {
+      const line = this.activeDialogue[this.dialogueIndex];
+      return line ? line.emotion : e1;
+    },
     text() {
       return this.garage ? "К роботу" : "На склад";
     },
@@ -111,20 +195,57 @@ export default {
     foundInventoryItems2() {
       return this.allItems2.filter(item => this.itemStore.isItemFound(item.id));
     }
-  }
+  },
+  mounted() {
+    //this.itemStore.resetItems() //для возвращения всех найденных вещей обратно
+    //useItemStore().setDialogueSeen(false)
+
+    this.startDialogue(this.dialogueIntro, "intro");
+
+
+    const saved = localStorage.getItem("foundItems");
+    if (saved) {
+      this.itemStore.foundItems = JSON.parse(saved);
+    }
+  },
+  watch: {
+    dialogueIndex() {
+      this.typeText();
+    },
+    isRobotComplete(newVal, oldVal) {
+      if (newVal && !oldVal) {
+        this.playRobotRepaired();
+        this.startDialogue(this.dialogueSuccess, "success");
+
+      }
+    }
+  },
 
 }
 </script>
 
 <template>
-  <div  class="wrapper" >
+  <div  class="wrapper" @click="handleClick" >
     <div @click="ChangePage" class="page_changer"><p class="text">{{text}}</p></div>
+
+    <img v-if="showCharacter"
+         class="character-behind"
+         :class="{ exit: isExiting }"
+         :src="currentEmotion"
+         alt="Персонаж"
+    />
+    <div v-if="showCharacter" class="dialogue-container" :class="{ exit: isExiting }">
+      <p>{{ typedText }}</p>
+    </div>
 
     <div class="maindiv" v-if="!this.garage">
       <img class="background-img1" src="/fon_car.svg">
       <HorBar :robotSlots="robotSlots" />
 
+
       <div class="robot" v-if="!isRobotComplete">
+        <img class="underRobot" src="/underRobot.svg">
+        <img class="back_Robot" src="/back_BrokenRobot.svg">
         <div
             v-for="(slot, index) in robotSlots"
             :key="slot.id"
@@ -142,10 +263,13 @@ export default {
         <img class="robotImg" src="/slomanyRobat.svg">
       </div>
 
-      <div v-else class="robot">
+      <div v-else class="robot" style="width: 60vh">
+        <img class="underRobot" src="/underRobot.svg">
+        <img class="back_Robot" src="/back_RepairedRobot.svg">
         <img class="robotImg" src="/Robot.svg">
       </div>
 
+      <img class="robotName" :src="isRobotComplete ? '/robotName.svg' : '/trash.svg'  " />
       <div class="inventory2">
         <div v-for="(item, index) in foundInventoryItems2" :key="index" class="inventory-item2" draggable="true" @dragstart="onDragStart(item)">
           <img :src="item.image" :alt="item.id" />
@@ -177,8 +301,25 @@ export default {
 </template>
 
 <style scoped>
+.underRobot{
+  position: absolute;
+  bottom:-14%;
+  left: 0;
+  width: 90%;
 
-
+}
+.back_Robot{
+  position: absolute;
+  top:0;
+  left: -25%;
+  width: 140%;
+}
+.robotName{
+  position: absolute;
+  bottom: 76vh;
+  right: 13vw;
+  width: 35vh;
+}
 .items {
   position: absolute;
   top: 0;
@@ -187,13 +328,15 @@ export default {
   height: 100%;
 }
 .maindiv{
-  width: 100vw;
+  width: 85vw;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-around;
-  height: 100vh;
-  background-image: url("/robofon.svg");
+  height: 85vh;
+  border-radius: 20px;
+  border: min(2vw,2vh) solid #0C5789;
+  background-color: #E1F0FC;
 }
 .detail {
   position: absolute;
@@ -236,7 +379,8 @@ export default {
 }
 .robot{
   position: relative;
-  width: 40vw;
+  width: 55vh;
+  z-index: 2;
   aspect-ratio: 1/1;
 }
 .robot-slot {
@@ -327,11 +471,11 @@ export default {
   margin: 0 auto;
   overflow: hidden;
 }
-
 .wrapper{
+  position: relative;
   width: 100vw;
   height: 100vh;
-  overflow: auto;
+  overflow: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
   justify-content: center;
@@ -376,5 +520,48 @@ export default {
 
 .page_changer:hover{
   scale:120%;
+}
+
+.dialogue-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30vh;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.6);
+  transition: transform 1s ease, opacity 1s ease;
+  display: flex;
+  align-items: flex-start;
+  padding: 2vw;
+  box-sizing: border-box;
+}
+
+.dialogue-container.exit {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.dialogue-container p {
+  position: absolute;
+  font-size: 3vw;
+  color: white;
+  max-width: 100%;
+  margin: 0;
+}
+/* Персонаж позади диалога */
+.character-behind {
+  position: absolute;
+  bottom: -300px;
+  right: 2vw;
+  height: 130vh;
+  z-index: 20;
+  object-fit: contain;
+  transition: transform 1s ease, opacity 1s ease;
+}
+
+.character-behind.exit {
+  transform: translateX(100%);
+  opacity: 0;
 }
 </style>

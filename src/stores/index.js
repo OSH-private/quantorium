@@ -38,7 +38,7 @@ const useGarageStore = defineStore("garage", {
 
 const useItemStore = defineStore("items", {
     state: () => ({
-        // { detail1: true, detail2: true, ... }
+        dialogueSeen: JSON.parse(localStorage.getItem("dialogueSeen") || "false"),
         foundItems: JSON.parse(localStorage.getItem("foundItems") || "{}")
     }),
     getters: {
@@ -51,10 +51,11 @@ const useItemStore = defineStore("items", {
                 localStorage.setItem("foundItems", JSON.stringify(this.foundItems));
             }
         },
-        resetItems() {
-            this.foundItems = {};
-            localStorage.removeItem("foundItems");
-        }
+        setDialogueSeen(value) {
+            this.dialogueSeen = value;
+            localStorage.setItem("dialogueSeen", JSON.stringify(value));
+        },
+
     }
 });
 

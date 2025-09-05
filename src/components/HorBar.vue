@@ -28,23 +28,27 @@ export default {
 
 <style scoped>
 .bar {
+  border-radius: 10px;
+  z-index: 10;
   display: flex;
-  flex-direction: column-reverse; /* чтобы шло снизу вверх */
+  flex-direction: column-reverse;
   width: 40px;
+  background: #3E8B5A;
   height: 200px;
-  border: 2px solid #333;
-  padding: 2px;
-  gap: 4px;
+  border: 5px solid #3E8B5A;
+
+
 }
 
 .bar-cell {
   flex: 1;
+  border: 5px solid #3E8B5A;
   background: #ddd;
   border-radius: 4px;
   transition: background 0.3s;
 }
 
 .bar-cell.filled {
-  background: #4caf50; /* зелёный для заполненной */
+  background: #68B888;
 }
 </style>
