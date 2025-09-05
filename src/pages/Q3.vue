@@ -214,7 +214,7 @@ function handleDrag(e) {
 function endDrag() {
   isDragging.value = false
 }
-function  Perehod(){
+function Perehod(){
   router.push({ path: "/roadmap" });
 }
 
@@ -327,8 +327,11 @@ async function execute(queue) {
     else if (cell === 4) {
       if (passedCheckpoint.value) {
         showNotification('ПОБЕДА! Вы успешно прошли уровень!')
+        localStorage.setItem("quest3_success_seen", "true");
         reset()
-        Perehod()
+        setTimeout(() => {
+          Perehod();
+        }, 1000);
         return
       } else {
         showNotification('Нужно сначала проехать через чекпоинт!')

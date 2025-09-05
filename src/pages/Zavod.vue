@@ -15,29 +15,53 @@ import e8 from "../assets/e8.svg";
 export default {
   data() {
     return {
-      dialogue: [
+      dialogueIntro: [
         { text: "Привет!", emotion: e1 },
         { text: "Меня зовут Роби.", emotion: e1 },
         { text: "Я умный робот, созданный для помощи исследователям и рабочим с починкой нашей фабрики.", emotion: e4 },
         { text: "Нажми на место, где ты хочешь нам помочь.", emotion: e1 },
         { text: "Если ты не знаешь что выбрать, предлагаю помочь с починкой одного из наших роботов (квест1)!", emotion: e4 }
       ],
+      dialogueSuccess:[
+        { text: "Ого!", emotion: e4},
+        { text: "У тебя получилось!", emotion: e4 },
+        { text: "Смотри, завод полностью восстановлен, все здания отремонтированны и работают", emotion: e2 },
+        { text: "Спасибо тебе, ты настоящий герой!", emotion: e2 },
+      ],
+      activeDialogue: [],
+      activeDialogueId: "intro",
       dialogueIndex: 0,
       typedText: "",
       typingInterval: null,
       showCharacter: true,
       isExiting: false,
       dialogueFinished: false,
-      hoverQuest: null
+      hoverQuest: null,
+
+      homeStore: useHomeStore()
     };
   },
 
   computed: {
+    successAll(){
+      return (this.successQ1 && this.successQ2 && this.successQ3)
+    },
+    successQ1(){
+      return JSON.parse(localStorage.getItem("quest1_success_seen") || "false");
+    },
+    successQ2(){
+      return JSON.parse(localStorage.getItem("quest2_success_seen") || "false");
+    },
+    successQ3(){
+      return JSON.parse(localStorage.getItem("quest3_success_seen") || "false");
+    },
     currentLine() {
-      return this.dialogue[this.dialogueIndex].text;
+      const line = this.activeDialogue[this.dialogueIndex];
+      return line ? line.text : "";
     },
     currentEmotion() {
-      return this.dialogue[this.dialogueIndex].emotion;
+      const line = this.activeDialogue[this.dialogueIndex];
+      return line ? line.emotion : e1;
     },
     buttonsDisabled() {
       return !this.dialogueFinished || this.typedText !== this.currentLine;
@@ -52,26 +76,43 @@ export default {
 
   mounted() {
     //useHomeStore().setDialogueSeen(false)
-    const homeStore = useHomeStore();
+    //localStorage.setItem("quest1_success_seen", "false");
+    //localStorage.setItem("quest2_success_seen", "false");
+    //localStorage.setItem("quest3_success_seen", "false");
 
-    if (homeStore.dialogueSeen) {
+
+
+    if (this.successAll) {
+      this.startDialogue(this.dialogueSuccess, "success");
+    } else if (this.homeStore.dialogueSeen) {
       this.showCharacter = false;
       this.dialogueFinished = true;
       this.typedText = this.currentLine;
     } else {
-      this.typeText();
+      this.startDialogue(this.dialogueIntro, "intro");
     }
   },
 
   methods: {
+    startDialogue(dialogArray, id = "intro") {
+      this.activeDialogue = dialogArray;
+      this.activeDialogueId = id;
+      this.dialogueIndex = 0;
+      this.typedText = "";
+      this.dialogueFinished = false;
+      this.isExiting = false;
+      this.showCharacter = true;
+      this.typeText();
+    },
     typeText() {
       clearInterval(this.typingInterval);
       this.typedText = "";
       let i = 0;
+      const line = this.currentLine;
+
       this.typingInterval = setInterval(() => {
-        if (i < this.currentLine.length) {
-          this.typedText += this.currentLine[i];
-          i++;
+        if (i < line.length) {
+          this.typedText += line[i++];
         } else {
           clearInterval(this.typingInterval);
         }
@@ -92,14 +133,21 @@ export default {
         return;
       }
 
-      if (this.dialogueIndex < this.dialogue.length - 1) {
+      if (this.dialogueIndex < this.activeDialogue.length - 1) {
         this.dialogueIndex++;
       } else {
         this.isExiting = true;
         this.dialogueFinished = true;
 
-        const homeStore = useHomeStore();
-        homeStore.setDialogueSeen(true);
+
+
+        if (this.activeDialogueId === "intro") {
+          this.homeStore.setDialogueSeen(true);
+        } else if (this.activeDialogueId === "success") {
+          setTimeout(() => {
+            this.Perehod4();
+          }, 1000);
+        }
 
         setTimeout(() => {
           this.showCharacter = false;
@@ -122,6 +170,9 @@ export default {
       if (this.buttonsDisabled) return;
       router.push({ path: "/quest2" });
     },
+    Perehod4(){
+      router.push({ path: "/final" });
+    },
     PerehodG() {
       if (this.buttonsDisabled) return;
       router.push({ path: "/garage" });
@@ -142,16 +193,19 @@ export default {
     <!-- Картинки квестов -->
     <div class="quest-images">
       <div class="quest-container" :class="{ hover: hoverQuest === 1 }">
-        <img src="../assets/b1.svg" alt="Квест 1" class="quest-img" />
-        <img src="../assets/k1.svg" alt="Контур 1" class="quest-contour" />
+        <img v-if="!successQ2" src="../assets/b1.svg" alt="Квест 1" class="quest-img" />
+        <img v-if="!successQ2" src="../assets/k1.svg" alt="Контур 1" class="quest-contour" />
+        <img v-else src="/r1.svg" alt="Квест 1" class="quest-img" >
       </div>
       <div class="quest-container" :class="{ hover: hoverQuest === 2 }">
-        <img src="../assets/b2.svg" alt="Квест 2" class="quest-img" />
-        <img src="../assets/k2.svg" alt="Контур 2" class="quest-contour" />
+        <img v-if="!successQ1" src="../assets/b2.svg" alt="Квест 2" class="quest-img" />
+        <img v-if="!successQ1" src="../assets/k2.svg" alt="Контур 2" class="quest-contour" />
+        <img v-else src="/r2.svg" alt="Квест 2" class="quest-img" >
       </div>
       <div class="quest-container" :class="{ hover: hoverQuest === 3 }">
-        <img src="../assets/b3.svg" alt="Квест 3" class="quest-img" />
-        <img src="../assets/k3.svg" alt="Контур 3" class="quest-contour" />
+        <img v-if="!successQ3" src="../assets/b3.svg" alt="Квест 3" class="quest-img" />
+        <img v-if="!successQ3" src="../assets/k3.svg" alt="Контур 3" class="quest-contour" />
+        <img v-else src="/r3.svg" alt="Квест 3" class="quest-img" >
       </div>
     </div>
 
@@ -175,21 +229,21 @@ export default {
           @mouseenter="setHoverQuest(1)"
           @mouseleave="clearHoverQuest"
           @click.stop="Perehod3"
-          :disabled="buttonsDisabled"
+          :disabled="successQ2"
       ></button>
       <button
           class="invisible-btn btn-quest2"
           @mouseenter="setHoverQuest(2)"
           @mouseleave="clearHoverQuest"
           @click.stop="Perehod2"
-          :disabled="buttonsDisabled"
+          :disabled="successQ1"
       ></button>
       <button
           class="invisible-btn btn-quest3"
           @mouseenter="setHoverQuest(3)"
           @mouseleave="clearHoverQuest"
           @click.stop="PerehodG"
-          :disabled="buttonsDisabled"
+          :disabled="successQ3"
       ></button>
     </div>
 

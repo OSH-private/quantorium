@@ -137,6 +137,7 @@ export default {
         if (this.activeDialogueId === "intro") {
           wiresStore.setDialogueSeen(true);
         } else if (this.activeDialogueId === "success") {
+          console.log("пока");
           localStorage.setItem("quest2_success_seen", "true");
         }
 
