@@ -194,6 +194,9 @@ export default {
     },
     foundInventoryItems2() {
       return this.allItems2.filter(item => this.itemStore.isItemFound(item.id));
+    },
+    nextItem() {
+      return this.allItems1.find(item => !this.isFound(item.id));
     }
   },
   mounted() {
@@ -292,6 +295,13 @@ export default {
           <img :src="item.image" :alt="item.id" />
         </div>
       </div>
+      <div class="search">
+        <img
+            v-if="nextItem"
+            :src="nextItem.image"
+            :alt="nextItem.id"
+        />
+      </div>
     </div>
 
 
@@ -301,6 +311,25 @@ export default {
 </template>
 
 <style scoped>
+.search{
+  left: 68%;
+  right: 35%;
+  padding-right: 5px;
+  padding-left: 5px;
+  bottom: 3%;
+  background-image: url("/public/search.svg");
+  background-size: cover;
+  position: absolute;
+  aspect-ratio: 8/9;
+  width: 7%;
+  height: auto;
+}
+.search img{
+  margin-top: 30%;
+  margin-left: 10%;
+  width: 70%;
+  height: 60%;
+}
 .underRobot{
   position: absolute;
   bottom:-14%;
