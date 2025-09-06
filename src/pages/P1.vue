@@ -56,13 +56,13 @@ const midX = computed(() => {
 })
 
 const wires = reactive([
-  { color: 'red', start: { x: 0.1, y: 0.2 }, end: { x: 0.9, y: 0.8 } },
-  { color: 'blue', start: { x: 0.1, y: 0.5 }, end: { x: 0.9, y: 0.2 } },
-  { color: 'green', start: { x: 0.1, y: 0.8 }, end: { x: 0.9, y: 0.5 } }
+  { color: 'red', image:'/red_p_end.svg', start: { x: 0.1, y: 0 }, end: { x: 0.9, y: 1 } },
+  { color: 'blue', image:'/blue_p_end.svg', start: { x: 0.1, y: 0.5 }, end: { x: 0.9, y: 0 } },
+  { color: 'green', image:'/green_p_end.svg', start: { x: 0.1, y: 1 }, end: { x: 0.9, y: 0.5 } }
 ])
 
 const VIEWBOX_WIDTH = 600
-const VIEWBOX_HEIGHT = 300
+const VIEWBOX_HEIGHT = 400
 
 const connections = ref([]) // [{ from: 0, to: 0 }, ...]
 const dragging = reactive({ index: null, active: false, x: 0, y: 0 })
@@ -167,55 +167,72 @@ onMounted(() => {
 
 <template>
   <div class="wrapper">
-    <svg class="game" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet">
+    <div class="maindiv">
+      <div class="game_wrap">
+        <svg class="game" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid meet">
 
-    <g v-for="(wire, index) in wires" :key="index">
-        <!-- Источник -->
-      <circle
-          :cx="wire.start.x * VIEWBOX_WIDTH"
-          :cy="wire.start.y * VIEWBOX_HEIGHT"
-          r="20"
-          :fill="wire.color"
-          @mousedown="startDrag(index, $event)"
-      />
+          <g v-for="(wire, index) in wires" :key="index">
+            <!-- Источник -->
+            <image
+                :x="wire.start.x * VIEWBOX_WIDTH - 25"
+                :y="wire.start.y * VIEWBOX_HEIGHT - 25"
+                width="50"
+                height="50"
+                cursor="pointer"
+                :href="wire.image"
+                @mousedown="startDrag(index, $event)"
+            />
 
-        <!-- Приёмник -->
-        <circle
-            :cx="wire.end.x * VIEWBOX_WIDTH"
-            :cy="wire.end.y * VIEWBOX_HEIGHT"
-            r="20"
-            :fill="wire.color"
-        />
-      </g>
+            <!-- Приёмник -->
+            <image
+                :x="wire.end.x * VIEWBOX_WIDTH - 25"
+                :y="wire.end.y * VIEWBOX_HEIGHT - 25"
+                width="50"
+                height="50"
+                :href="wire.image"
+            />
+            <!-- Прозрачный круг для кликов -->
+            <circle
+                :cx="wire.end.x * VIEWBOX_WIDTH"
+                :cy="wire.end.y * VIEWBOX_HEIGHT"
+                r="25"
+                fill="transparent"
+                @mouseup="endDrag"
+            />
+          </g>
 
-      <!-- Протянутые линии -->
-      <path
-          v-for="(conn, i) in connections"
-          :key="i"
-          :d="computePath(conn.from, conn.to)"
-          stroke="gray"
-          stroke-width="20"
-          stroke-linecap="round"
-          fill="none"
-      />
+          <!-- Протянутые линии -->
+          <path
+              v-for="(conn, i) in connections"
+              :key="i"
+              :d="computePath(conn.from, conn.to)"
+              stroke="darkgray"
+              stroke-width="20"
+              stroke-linecap="round"
+              fill="none"
+          />
 
-      <!-- Активная линия -->
-      <path
-          v-if="dragging.active"
-          :d="computeActivePath()"
-          stroke="gray"
-          stroke-width="15"
-          stroke-dasharray="10,5"
-          fill="none"
-      />
-    </svg>
+          <!-- Активная линия -->
+          <path
+              v-if="dragging.active"
+              :d="computeActivePath()"
+              stroke="darkgray"
+              stroke-width="15"
+              stroke-dasharray="10,5"
+              fill="none"
+          />
+        </svg>
+      </div>
+
+    </div>
+
     <div class="controls">
         <div v-if="!allConnected" class="btns" @click="resetConnections">
-          Сбросить
+          <p>Сбросить</p>
         </div>
         <div v-if="allConnected" class="end">
-          <div class="success">🎉 Все соединения правильные!</div>
-          <div class="btns" @click="Perehod3">Готово</div>
+          <div class="success"><p>Все соединения правильные!</p></div>
+          <div class="btns" @click="Perehod3"><p>Готово</p></div>
         </div>
     </div>
 
@@ -223,6 +240,11 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.game_wrap{
+  height: 80%;
+  width: 35%;
+  position: relative;
+}
 .end{
   align-items: center;
   display: flex;
@@ -231,51 +253,92 @@ onMounted(() => {
 }
 .btns{
   margin-left: auto;
-  border: 2px outset black;
+  font-family: Arial, sans-serif;
+  margin-right: 5%;
   background-color: rgb(70, 125, 190);
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  color: white;
   display: flex;
-  border-radius: 25px;
   font-size: 3vw;
-  height: 7vh;
-  width: 15vw;
+  height: max(6vh, 3vw);
+  padding: 0.5vw 1vw;
+  background-color: rgba(230, 210, 170, 0.9);
+  color: white;
+  border: 4px solid rgb(200, 150, 110, 9);
+  cursor: pointer;
+  border-radius: 12px;
+}
+.btns p{
+  text-align: center;
+  width: 100%;
+  font-size: 2vw;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
 }
 .controls{
+  position: absolute;
   justify-content:space-between;
   align-items: center;
   display: flex;
-  width: 80vw;
-  height: 20vh;
-  margin: auto;
+  width: 100vw;
+  height: 15vh;
+  bottom:0;
+
 }
 .success {
-  font-size: 24px;
-  color: green;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  text-align: center;
+  background-color: rgba(230, 210, 170, 0.9);
+  border-radius: 12px;
+  padding: 5px;
+  width: 40vw;
+  height: 7vh;
   margin-right: 2vw;
+}
+.success p{
+  font-weight: bold;
+  font-size: 2vw;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  color: #ffffff;
 }
 .game {
   user-select: none;
+  position: relative;
   width: 100%;
-  height: 80%;
+  height: 100%;
 }
-.wrapper {
+.maindiv{
+  align-items: center;
+  aspect-ratio: 1920/1080;
+  display: flex;
+  margin-right: auto;
+  margin-left: auto;
+  justify-content: center;
+  width: 100%;
+  max-height: 100%;
   user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
-  user-drag: none;
   -webkit-user-drag: none;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  background-image: url("/shitok_back.svg");
+}
+.wrapper {
+  overflow: hidden;
+  justify-content: center;
   width: 100vw;
+  background-image: url("/fon_car.svg");
   height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
-  overflow: hidden;
 }
 
 </style>

@@ -4,13 +4,13 @@ import { router } from '../router/index.js'
 import {useQuestsStore} from "../stores/index.js";
 
 const VIEWBOX_WIDTH = 600
-const VIEWBOX_HEIGHT = 300
+const VIEWBOX_HEIGHT = 400
 
-const source = { x: 0.17, y: 0.45 } // нормализованные координаты
+const source = { x: 0.1, y: 0.45 } // нормализованные координаты
 const splitter = { x: 0.5, y: 0.45 }
 const lamps = reactive([
-  { x: 0.83, y: 0.23, on: false },
-  { x: 0.83, y: 0.62, on: false }
+  { x: 0.9, y: 0, on: false },
+  { x: 0.9, y: 1, on: false }
 ])
 
 const connections = ref([])
@@ -138,8 +138,10 @@ const getY = (point) => {
 </script>
 
 <template>
-  <div>
-    <svg class="game" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet">
+  <div class="wrapper">
+    <div class="maindiv">
+      <div class="game_wrap">
+        <svg class="game" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid meet">
       <!-- Соединения -->
       <line
           v-for="(conn, i) in connections"
@@ -148,29 +150,31 @@ const getY = (point) => {
           :y1="getY(conn.from)"
           :x2="getX(conn.to)"
           :y2="getY(conn.to)"
-          stroke="black"
+          stroke="darkgray"
           stroke-width="30"
           stroke-linecap="round"
       />
 
       <!-- Источник -->
-      <circle
-          :cx="source.x * VIEWBOX_WIDTH"
-          :cy="source.y * VIEWBOX_HEIGHT"
-          r="20"
-          fill="red"
+      <image
+          :x="source.x * VIEWBOX_WIDTH-25"
+          :y="source.y * VIEWBOX_HEIGHT-25"
+          cursor="pointer"
           class="items"
+          width="50"
+          height="50"
+          href="/red_p_end.svg"
           @mousedown="startDrag('source', $event)"
       />
 
       <!-- Разветвитель -->
-      <rect
-          :x="splitter.x * VIEWBOX_WIDTH - 20"
-          :y="splitter.y * VIEWBOX_HEIGHT - 20"
-          width="40"
-          height="40"
+      <image
+          :x="splitter.x * VIEWBOX_WIDTH - 40"
+          :y="splitter.y * VIEWBOX_HEIGHT - 40"
+          href="/splitter.svg"
+          width="80"
+          height="80"
           class="items"
-          fill="#888"
           @mousedown="startDrag('splitter', $event)"
       />
 
@@ -182,6 +186,13 @@ const getY = (point) => {
             r="20"
             :fill="lamp.on ? 'red' : '#440000'"
         />
+        <image
+            :x="lamp.x * VIEWBOX_WIDTH-25"
+            :y="lamp.y * VIEWBOX_HEIGHT-25"
+            width="50"
+            height="50"
+            href="/red_p_end.svg"
+        />
       </g>
 
       <!-- Активное соединение -->
@@ -191,25 +202,32 @@ const getY = (point) => {
           :y1="getY(dragging.from)"
           :x2="dragging.x * VIEWBOX_WIDTH"
           :y2="dragging.y * VIEWBOX_HEIGHT"
-          stroke="gray"
-          stroke-dasharray="5,5"
-          stroke-width="3"
+          stroke="darkgray"
+          stroke-dasharray="10,5"
+          stroke-width="20"
       />
     </svg>
+    </div>
+    </div>
 
     <div class="controls">
       <div v-if="!allOn" class="btns" @click="reset">
-        Сбросить
+        <p>Сбросить</p>
       </div>
       <div v-if="allOn" class="end">
-        <div class="success">🔥 Обе лампы зажглись!</div>
-        <div class="btns" @click="Perehod3">Готово</div>
+        <div class="success"><p>Все соединения правильные!</p></div>
+        <div class="btns" @click="Perehod3"><p>Готово</p></div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.game_wrap{
+  height: 80%;
+  width: 35%;
+  position: relative;
+}
 .end{
   align-items: center;
   display: flex;
@@ -218,38 +236,92 @@ const getY = (point) => {
 }
 .btns{
   margin-left: auto;
-  border: 2px outset black;
+  margin-right: 5%;
+  font-family: Arial, sans-serif;
   background-color: rgb(70, 125, 190);
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  color: white;
   display: flex;
-  border-radius: 25px;
   font-size: 3vw;
-  height: 7vh;
-  width: 15vw;
+  height: max(6vh, 3vw);
+  padding: 0.5vw 1vw;
+  background-color: rgba(230, 210, 170, 0.9);
+  color: white;
+  border: 4px solid rgb(200, 150, 110, 9);
+  cursor: pointer;
+  border-radius: 12px;
+}
+.btns p{
+  text-align: center;
+  width: 100%;
+  font-size: 2vw;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
 }
 .controls{
+  position: absolute;
   justify-content:space-between;
   align-items: center;
   display: flex;
-  width: 80vw;
-  height: 20vh;
-  margin: auto;
+  width: 100vw;
+  height: 15vh;
+  bottom:0;
+
 }
 .success {
-  font-size: 24px;
-  color: green;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  text-align: center;
+  background-color: rgba(230, 210, 170, 0.9);
+  border-radius: 12px;
+  padding: 5px;
+  width: 40vw;
+  height: 7vh;
   margin-right: 2vw;
+}
+.success p{
+  font-weight: bold;
+  font-size: 2vw;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  color: #ffffff;
 }
 .game {
   user-select: none;
-  height: 80vh;
-  width: 100vw;
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
-.items{
-  cursor: pointer;
+.maindiv{
+  align-items: center;
+  aspect-ratio: 1920/1080;
+  display: flex;
+  margin-right: auto;
+  margin-left: auto;
+  justify-content: center;
+  width: 100%;
+  max-height: 100%;
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-drag: none;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  background-image: url("/shitok_back.svg");
+}
+.wrapper {
+  overflow: hidden;
+  justify-content: center;
+  width: 100vw;
+  background-image: url("/fon_car.svg");
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 </style>

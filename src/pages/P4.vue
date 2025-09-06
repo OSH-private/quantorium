@@ -4,14 +4,14 @@ import { router } from '../router/index.js'
 import {useQuestsStore} from "../stores/index.js";
 
 const VIEWBOX_WIDTH = 600
-const VIEWBOX_HEIGHT = 300
+const VIEWBOX_HEIGHT = 400
 
-const red = { x: 0.166, y: 0.266 }
-const blue = { x: 0.166, y: 0.5 }
-const green = { x: 0.166, y: 0.733 }
+const red = { x: 0.1, y: 0 , image:'/red_p_end.svg',}
+const blue = { x: 0.1, y: 0.5, image:'/blue_p_end.svg', }
+const green = { x: 0.1, y: 1, image:'/green_p_end.svg',}
 
 const filter = { x: 0.5, y: 0.5 }
-const lamp = { x: 0.833, y: 0.5 }
+const lamp = { x: 0.9, y: 0.5 }
 
 const connections = ref([])
 const dragging = reactive({ from: null, active: false, x: 0, y: 0 })
@@ -108,8 +108,10 @@ onMounted(() => {
 
 
 <template>
-  <div>
-    <svg class="game" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet">
+  <div class="wrapper">
+    <div class="maindiv">
+      <div class="game_wrap">
+        <svg class="game" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid meet">
 
       <!-- Провода -->
       <line
@@ -119,7 +121,7 @@ onMounted(() => {
           :y1="getY(conn.from)"
           :x2="getX(conn.to)"
           :y2="getY(conn.to)"
-          stroke="black"
+          stroke="darkgray"
           stroke-width="30"
           stroke-linecap="round"
       />
@@ -128,28 +130,24 @@ onMounted(() => {
       <circle :cx="red.x * VIEWBOX_WIDTH" :cy="red.y * VIEWBOX_HEIGHT" r="20" class="items" fill="red" @mousedown="startDrag('red', $event)" />
       <circle :cx="green.x * VIEWBOX_WIDTH" :cy="green.y * VIEWBOX_HEIGHT" r="20" class="items" fill="green" @mousedown="startDrag('green', $event)" />
       <circle :cx="blue.x * VIEWBOX_WIDTH" :cy="blue.y * VIEWBOX_HEIGHT" r="20" class="items" fill="blue" @mousedown="startDrag('blue', $event)" />
+      <image :x="red.x * VIEWBOX_WIDTH-25" :y="red.y * VIEWBOX_HEIGHT-25" width="50" height="50" cursor="pointer" :href="red.image" class="items" @mousedown="startDrag('red', $event)" />
+      <image :x="green.x * VIEWBOX_WIDTH-25" :y="green.y * VIEWBOX_HEIGHT-25" width="50" height="50" cursor="pointer"  :href="green.image" class="items" @mousedown="startDrag('green', $event)" />
+      <image :x="blue.x * VIEWBOX_WIDTH-25" :y="blue.y * VIEWBOX_HEIGHT-25" width="50" height="50" cursor="pointer"  :href="blue.image" class="items" @mousedown="startDrag('blue', $event)" />
 
       <!-- Фильтр -->
-      <rect
-          :x="filter.x * VIEWBOX_WIDTH - 25"
-          :y="filter.y * VIEWBOX_HEIGHT - 25"
-          width="50"
-          height="50"
+      <image
+          :x="filter.x * VIEWBOX_WIDTH - 50"
+          :y="filter.y * VIEWBOX_HEIGHT - 50"
+          width="100"
+          height="100"
           class="items"
-          fill="lightgreen"
+          href="/filter.svg"
           @mousedown="startDrag('filter', $event)"
       />
-      <text
-          :x="filter.x * VIEWBOX_WIDTH - 15"
-          :y="filter.y * VIEWBOX_HEIGHT + 5"
-          font-size="14"
-          class="items"
-          @mousedown="startDrag('filter', $event)"
-      >Фильтр</text>
 
       <!-- Лампа -->
-      <circle :cx="lamp.x * VIEWBOX_WIDTH" :cy="lamp.y * VIEWBOX_HEIGHT" r="20" class="items" :fill="allCorrect ? 'lime' : '#444'" />
-
+      <circle :cx="lamp.x * VIEWBOX_WIDTH" :cy="lamp.y * VIEWBOX_HEIGHT"  class="items" :fill="allCorrect ? 'lime' : '#444'" />
+      <image :x="lamp.x * VIEWBOX_WIDTH-25" :y="lamp.y * VIEWBOX_HEIGHT-25" width="50" height="50"  class="items" :href="allCorrect ? '/green_p_end.svg' : '/gray_p_end.svg'" />
       <!-- Активная линия -->
       <line
           v-if="dragging.active"
@@ -157,64 +155,125 @@ onMounted(() => {
           :y1="getY(dragging.from)"
           :x2="dragging.x * VIEWBOX_WIDTH"
           :y2="dragging.y * VIEWBOX_HEIGHT"
-          stroke="gray"
-          stroke-dasharray="5,5"
-          stroke-width="3"
+          stroke="darkgray"
+          stroke-dasharray="10,5"
+          stroke-width="20"
       />
     </svg>
+    </div>
+    </div>
 
     <div class="controls">
       <div v-if="!allCorrect" class="btns" @click="reset">
         Сбросить
       </div>
       <div v-if="allCorrect" class="end">
-        <div class="success">🔥 Обе лампы зажглись!</div>
-        <div class="btns" @click="Perehod5">Готово</div>
+        <div class="success"><p>Обе лампы зажглись!</p></div>
+        <div class="btns" @click="Perehod5"><p>Готово</p></div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.end {
+.game_wrap{
+  height: 80%;
+  width: 35%;
+  position: relative;
+}
+.end{
   align-items: center;
   display: flex;
   flex-direction: row;
   margin-left: auto;
 }
-.btns {
+.btns{
   margin-left: auto;
-  border: 2px outset black;
+  font-family: Arial, sans-serif;
+  margin-right: 5%;
   background-color: rgb(70, 125, 190);
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  color: white;
   display: flex;
-  border-radius: 25px;
   font-size: 3vw;
-  height: 7vh;
-  width: 15vw;
+  height: max(6vh, 3vw);
+  padding: 0.5vw 1vw;
+  background-color: rgba(230, 210, 170, 0.9);
+  color: white;
+  border: 4px solid rgb(200, 150, 110, 9);
+  cursor: pointer;
+  border-radius: 12px;
 }
-.controls {
-  justify-content: space-between;
+.btns p{
+  text-align: center;
+  width: 100%;
+  font-size: 2vw;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+}
+.controls{
+  position: absolute;
+  justify-content:space-between;
   align-items: center;
   display: flex;
-  width: 80vw;
-  height: 20vh;
-  margin: auto;
+  width: 100vw;
+  height: 15vh;
+  bottom:0;
+
+}
+.success {
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  text-align: center;
+  background-color: rgba(230, 210, 170, 0.9);
+  border-radius: 12px;
+  padding: 5px;
+  width: 40vw;
+  height: 7vh;
+  margin-right: 2vw;
+}
+.success p{
+  font-weight: bold;
+  font-size: 2vw;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  color: #ffffff;
 }
 .game {
   user-select: none;
-  height: 80vh;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.maindiv{
+  align-items: center;
+  aspect-ratio: 1920/1080;
+  display: flex;
+  margin-right: auto;
+  margin-left: auto;
+  justify-content: center;
+  width: 100%;
+  max-height: 100%;
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-drag: none;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  background-image: url("/shitok_back.svg");
+}
+.wrapper {
+  overflow: hidden;
+  justify-content: center;
   width: 100vw;
-}
-.success {
-  font-size: 24px;
-  color: green;
-  margin-right: 2vw;
-}
-.items {
-  cursor: pointer;
+  background-image: url("/fon_car.svg");
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 </style>
