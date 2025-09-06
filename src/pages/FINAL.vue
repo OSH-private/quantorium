@@ -137,7 +137,7 @@ export default {
 
     <div ref="grammBlock" class="gramm">
       <div class="topText">
-        <p>Граммота за успешное прохождение
+        <p>Грамота за успешное прохождение
           приключения с Роби</p>
       </div>
       <div class="middle">
