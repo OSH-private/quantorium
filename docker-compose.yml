@@ -11,6 +11,8 @@ services:
       - VIRTUAL_HOST=game.cnfro52.ru,www.game.cnfro52.ru
       - LETSENCRYPT_HOST=game.cnfro52.ru,www.game.cnfro52.ru
       - LETSENCRYPT_EMAIL=ilia.shevhenkov@gmail.com
+    networks:
+      - proxy-tier
 
   nginx-proxy:
     image: jwilder/nginx-proxy
