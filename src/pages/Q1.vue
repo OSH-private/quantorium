@@ -53,18 +53,18 @@ export default {
         { id: "detail5", top: "15%", left: "60%", width: "30%", item: null },
       ],
       allItems1: [
-        { id: "detail1", image: "/public/detail1.svg" },
-        { id: "detail2", image: "/public/detail2.svg" },
-        { id: "detail3", image: "/public/detail3normal.svg" },
-        { id: "detail4", image: "/public/detail4.svg" },
-        { id: "detail5", image: "/public/detail5.svg" }
+        { id: "detail1", image: "/detail1.svg" },
+        { id: "detail2", image: "/detail2.svg" },
+        { id: "detail3", image: "/detail3normal.svg" },
+        { id: "detail4", image: "/detail4.svg" },
+        { id: "detail5", image: "/detail5.svg" }
       ],
       allItems2: [
-        { id: "detail1", image: "/public/detail1_2.svg" },
-        { id: "detail2", image: "/public/detail2_2.svg" },
-        { id: "detail3", image: "/public/detail3_2.svg" },
-        { id: "detail4", image: "/public/detail4_2.svg" },
-        { id: "detail5", image: "/public/detail5_2.svg" },
+        { id: "detail1", image: "/detail1_2.svg" },
+        { id: "detail2", image: "/detail2_2.svg" },
+        { id: "detail3", image: "/detail3_2.svg" },
+        { id: "detail4", image: "/detail4_2.svg" },
+        { id: "detail5", image: "/detail5_2.svg" },
       ]
     }
   },
@@ -317,7 +317,7 @@ export default {
   padding-right: 5px;
   padding-left: 5px;
   bottom: 3%;
-  background-image: url("/public/search.svg");
+  background-image: url("/search.svg");
   background-size: cover;
   position: absolute;
   aspect-ratio: 8/9;
