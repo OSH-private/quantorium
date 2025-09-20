@@ -9,6 +9,7 @@ services:
     restart: unless-stopped
     environment:
       - VIRTUAL_HOST=game.cnfro52.ru,www.game.cnfro52.ru
+      - VIRTUAL_PORT=80
       - LETSENCRYPT_HOST=game.cnfro52.ru,www.game.cnfro52.ru
       - LETSENCRYPT_EMAIL=ilia.shevhenkov@gmail.com
     networks:
