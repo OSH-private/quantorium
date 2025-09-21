@@ -514,7 +514,6 @@ export default {
 .wrapper,
 .wrapper * {
   user-select: none;
-  -webkit-user-drag: none;
 }
 .background-img2 {
   width: 100%;
