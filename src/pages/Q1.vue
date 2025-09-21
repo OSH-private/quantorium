@@ -97,11 +97,11 @@ export default {
       console.log(this.garage)
     },
     playSuccessSound() {
-      const audio = new Audio('../public/found.mp3')
+      const audio = new Audio('/found.mp3')
       audio.play()
     },
     playRobotRepaired() {
-      const audio = new Audio('../public/completed.mp3')
+      const audio = new Audio('/completed.mp3')
       audio.play()
     },
     findItem(id) {
