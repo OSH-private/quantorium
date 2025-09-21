@@ -140,12 +140,12 @@ const allConnected = computed(() => {
 })
 
 const playConnectSound = () => {
-  const audio = new Audio('../public/connected.mp3')
+  const audio = new Audio('/connected.mp3')
   audio.play()
 }
 
 const playSuccessSound = () => {
-  const audio = new Audio('../public/completed.mp3')
+  const audio = new Audio('/completed.mp3')
   audio.play()
 }
 

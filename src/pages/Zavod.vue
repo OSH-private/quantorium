@@ -65,6 +65,9 @@ export default {
     },
     buttonsDisabled() {
       return !this.dialogueFinished || this.typedText !== this.currentLine;
+    },
+    exitDisabled(){
+      return !this.successAll;
     }
   },
 
@@ -251,7 +254,7 @@ export default {
     <div class="final-btn">
       <button
           @click.stop="Perehod5"
-          :disabled="buttonsDisabled"
+          :disabled="exitDisabled"
       >ФИНАЛ</button>
     </div>
   </div>
