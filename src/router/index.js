@@ -11,6 +11,7 @@ import P4 from "../pages/P4.vue";
 import P3 from "../pages/P3.vue";
 import P2 from "../pages/P2.vue";
 import garage from "../pages/garage.vue";
+import Politics from "../pages/Politics.vue";
 const routes =
     [
         {
@@ -40,6 +41,10 @@ const routes =
         {
             path: '/final',
             component: Pg5,
+        },
+        {
+            path: '/privacy',
+            component: Politics,
         },
         {
             path: '/p4',

@@ -35,6 +35,17 @@ const useGarageStore = defineStore("garage", {
         }
     }
 });
+const useFinalStore = defineStore('final', {
+    state: ( ) =>({
+        dialogueSeen: JSON.parse(localStorage.getItem("dialogueSeen") || "false")
+    }),
+    actions: {
+        setDialogueSeen(value) {
+            this.dialogueSeen = value;
+            localStorage.setItem("dialogueSeen", JSON.stringify(value));
+        }
+    }
+})
 
 const useItemStore = defineStore("items", {
     state: () => ({
@@ -81,4 +92,4 @@ const useQuestsStore = defineStore('quests', {
     }
 })
 
-export {useWiresStore, useHomeStore, useQuestsStore, useGarageStore, useItemStore}
+export {useWiresStore, useHomeStore, useFinalStore, useQuestsStore, useGarageStore, useItemStore}

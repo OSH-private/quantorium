@@ -4,7 +4,7 @@ import html2canvas from "html2canvas";
 import e4 from "../assets/e4.svg";
 import e1 from "../assets/e1.svg";
 import e2 from "../assets/e2.svg";
-import {useGarageStore} from "../stores/index.js";
+import {useFinalStore, useGarageStore} from "../stores/index.js";
 
 export default {
   data(){
@@ -14,6 +14,7 @@ export default {
       name: "",
       surname: "",
       location: "",
+      date:"",
       dialogue: [
         { text: "Прежде чем ты уйдешь, я бы хотел подарить тебе это, на память", emotion: e4 },
         { text: "Попроси учителя или взрослых, чтобы помогли вместе заполнили данные о тебе", emotion: e2},
@@ -30,7 +31,16 @@ export default {
     }
   },
   mounted() {
-    this.typeText();
+    //useFinalStore().setDialogueSeen(false)
+    const finalStore = useFinalStore();
+
+    if (finalStore.dialogueSeen) {
+      this.showCharacter = false;
+      this.dialogueFinished = true;
+      this.typedText = this.currentLine;
+    } else {
+      this.typeText();
+    }
   },
   computed:{
     currentLine() {
@@ -46,6 +56,21 @@ export default {
     }
   },
   methods: {
+    async sendToGoogleSheet(surname, name, location, date) {
+      await fetch("https://script.google.com/macros/s/AKfycbwvNjRA8vA_CK3H8XPm6CjE5peG5YNVobXAQft7hqyop2zav3tPsfJDRWTAxr_6zzg/exec", {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify({
+          family_name: surname,
+          name: name,
+          city: location,
+          birthdate: date
+        })
+      });
+    },
+    goToPrivacyPolicy() {
+      this.$router.push('/privacy');
+    },
     typeText() {
       clearInterval(this.typingInterval);
       this.typedText = "";
@@ -80,6 +105,8 @@ export default {
         this.isExiting = true;
         this.dialogueFinished = true;
 
+        const finalStore = useFinalStore();
+        finalStore.setDialogueSeen(true);
 
         setTimeout(() => {
           this.showCharacter = false;
@@ -93,7 +120,13 @@ export default {
       this.name = this.$refs.nameInput.value;
       this.surname = this.$refs.surnameInput.value;
       this.location = this.$refs.locationInput.value;
-
+      this.date = this.$refs.date.value;
+      if(!this.name || !this.surname || !this.location || !this.date)
+      {return alert('Вы заполнили не все поля!')}
+      if(this.$refs.agree.checked===false){
+        return alert('Вы должны дать согласие на обработку данных')
+      }
+      this.sendToGoogleSheet(this.surname, this.name, this.location, this.date);
       this.showSaveBtn = true;
     },
     Download() {
@@ -132,7 +165,7 @@ export default {
     </div>
     <div class="police">
       <input ref="agree" type="checkbox">
-      <p>Согласен с <a href="https://tilda.cc/ru/privacy-generator/"> политикой обработки персональных данных</a></p>
+      <p>Согласен с <a href="#" @click.prevent="goToPrivacyPolicy"> политикой обработки персональных данных</a></p>
     </div>
 
     <div ref="grammBlock" class="gramm">
@@ -162,6 +195,14 @@ export default {
         <template v-else>
           <p class="print-text">{{ location }}</p>
         </template>
+        <div class="date_div" v-if="!showSaveBtn">
+          <p class="date_txt">Дата рождения:</p>
+          <input class="date" ref="date" type="date" />
+        </div>
+        <div class="date_div" v-else>
+          <p class="print-text">Дата рождения:</p>
+          <p class="date">{{date}}</p>
+        </div>
       </div>
       <div class="robot">
         <img src="/maskot.svg">
@@ -177,7 +218,20 @@ export default {
 </template>
 
 <style scoped>
-
+.date{
+  height: 50%  !important;
+  margin-left: -60% !important;
+  margin-top: 0.2%;
+  cursor: pointer;
+  width: 35% !important;
+}
+.date_div{
+  margin-right: auto;
+  display: flex;
+  flex-direction: row;
+  width: 90%; justify-content: left;
+  height: 30%;
+}
 .button p{
   font-weight: bold;
   font-size: 3vw;
@@ -224,6 +278,15 @@ export default {
   height: 50%;
   border: 0;
 }
+.bottom input, .bottom p{
+  margin-right: auto;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+  font-size: min(3vw, 5vh);
+  width: 32%;
+  height: 30%;
+  border: 0;
+}
 .middle{
   margin-left: auto;
   margin-right: auto;
@@ -234,6 +297,7 @@ export default {
   width: 80%;
 }
 .bottom textarea, .bottom p{
+  margin-right: auto;
   font-weight: bold;
   font-family: Arial, sans-serif;
   resize: none;
@@ -249,8 +313,8 @@ export default {
   margin-right: auto;
   align-items: center;
   display: flex;
-  flex-direction: row;
-  height: 30%;
+  flex-direction: column;
+  height: 35%;
   width: 80%;
 }
 .topText{
