@@ -27,7 +27,7 @@ export default {
       dialogueSuccess:[
         { text: "Ого!", emotion: e4},
         { text: "У тебя получилось!", emotion: e4 },
-        { text: "Робот как новеньких, можем идти дальше", emotion: e2 },
+        { text: "Робот как новенький, можем идти дальше", emotion: e2 },
       ],
       activeDialogue: [],
       activeDialogueId: "intro",
@@ -69,6 +69,9 @@ export default {
     }
   },
   methods: {
+    Back(){
+      router.push({ path: "/roadmap" });
+    },
     onDragStart(item) {
       this.draggedItem = item;
     },
@@ -230,6 +233,7 @@ export default {
 <template>
   <div  class="wrapper" @click="handleClick" >
     <div @click="ChangePage" class="page_changer"><p class="text">{{text}}</p></div>
+    <div @click="Back" class="back_btn"><p class="text">Назад</p></div>
 
     <img v-if="showCharacter"
          class="character-behind"
@@ -543,7 +547,7 @@ export default {
   width: 10vw;
   height: max(6vh, 3vw);
   padding: 0.5vw 1vw;
-  background-color: rgba(230, 210, 170, 0.9);
+  background-color: rgba(230, 210, 170);
   color: white;
   border: 4px solid rgb(200,150,110,9) ;
   cursor: pointer;
@@ -552,6 +556,26 @@ export default {
 }
 
 .page_changer:hover{
+  scale:120%;
+}
+.back_btn{
+  align-items: center;
+  display: flex;
+  position: absolute;
+  top: 5vh;
+  left: 3vw;
+  transition: all 0.3s ease;
+  width: 10vw;
+  height: max(6vh, 3vw);
+  padding: 0.5vw 1vw;
+  background-color: rgba(230, 210, 170);
+  color: white;
+  border: 4px solid rgb(200,150,110,9) ;
+  cursor: pointer;
+  border-radius: 12px;
+  z-index: 3;
+}
+.back_btn:hover{
   scale:120%;
 }
 
