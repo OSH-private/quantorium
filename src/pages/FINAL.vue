@@ -4,7 +4,14 @@ import html2canvas from "html2canvas";
 import e4 from "../assets/e4.svg";
 import e1 from "../assets/e1.svg";
 import e2 from "../assets/e2.svg";
-import {useFinalStore, useGarageStore} from "../stores/index.js";
+import {
+  useFinalStore,
+  useGarageStore,
+  useHomeStore,
+  useItemStore,
+  useQuestsStore,
+  useWiresStore
+} from "../stores/index.js";
 
 export default {
   data(){
@@ -139,6 +146,17 @@ export default {
         link.click();
       });
       })
+      useItemStore().setDialogueSeen(false)
+      useGarageStore().setDialogueSeen(false)
+      useHomeStore().setDialogueSeen(false)
+      useQuestsStore().cleanQuests()
+      useWiresStore().setDialogueSeen(false)
+      localStorage.setItem("quest1_success_seen", "false");
+      localStorage.setItem("quest2_success_seen", "false");
+      localStorage.setItem("quest3_success_seen", "false");
+      setTimeout(() => {
+        router.push({path: '/'})
+      }, 5000);
     },
   }
 }
