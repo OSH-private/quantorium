@@ -50,7 +50,7 @@ export default {
     }
   },
 
-  mounted() {
+  created() {
     //useGarageStore().setDialogueSeen(false)
     const garageStore = useGarageStore();
 

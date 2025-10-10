@@ -203,6 +203,7 @@ export default {
     }
   },
   mounted() {
+      console.log(useGarageStore().dialogueSeen)
     //this.itemStore.resetItems() //для возвращения всех найденных вещей обратно
     //useItemStore().setDialogueSeen(false)
 

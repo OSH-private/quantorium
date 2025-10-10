@@ -2,54 +2,54 @@ import { defineStore } from "pinia";
 
 const useHomeStore = defineStore("home", {
     state: () => ({
-        dialogueSeen: JSON.parse(localStorage.getItem("dialogueSeen") || "false")
+        dialogueSeen: JSON.parse(localStorage.getItem("home_dialogueSeen") || "false")
     }),
     actions: {
         setDialogueSeen(value) {
             this.dialogueSeen = value;
-            localStorage.setItem("dialogueSeen", JSON.stringify(value));
+            localStorage.setItem("home_dialogueSeen", JSON.stringify(value));
         }
     }
 });
 
 const useWiresStore = defineStore("wires", {
     state: () => ({
-        dialogueSeen: JSON.parse(localStorage.getItem("dialogueSeen") || "false")
+        dialogueSeen: JSON.parse(localStorage.getItem("wires_dialogueSeen") || "false")
     }),
     actions: {
         setDialogueSeen(value) {
             this.dialogueSeen = value;
-            localStorage.setItem("dialogueSeen", JSON.stringify(value));
+            localStorage.setItem("wires_dialogueSeen", JSON.stringify(value));
         }
     }
 });
 
 const useGarageStore = defineStore("garage", {
     state: () => ({
-        dialogueSeen: JSON.parse(localStorage.getItem("dialogueSeen") || "false")
+        dialogueSeen: JSON.parse(localStorage.getItem("garage_dialogueSeen") || "false")
     }),
     actions: {
         setDialogueSeen(value) {
             this.dialogueSeen = value;
-            localStorage.setItem("dialogueSeen", JSON.stringify(value));
+            localStorage.setItem("garage_dialogueSeen", JSON.stringify(value));
         }
     }
 });
 const useFinalStore = defineStore('final', {
     state: ( ) =>({
-        dialogueSeen: JSON.parse(localStorage.getItem("dialogueSeen") || "false")
+        dialogueSeen: JSON.parse(localStorage.getItem("final_dialogueSeen") || "false")
     }),
     actions: {
         setDialogueSeen(value) {
             this.dialogueSeen = value;
-            localStorage.setItem("dialogueSeen", JSON.stringify(value));
+            localStorage.setItem("final_dialogueSeen", JSON.stringify(value));
         }
     }
 })
 
 const useItemStore = defineStore("items", {
     state: () => ({
-        dialogueSeen: JSON.parse(localStorage.getItem("dialogueSeen") || "false"),
+        dialogueSeen: JSON.parse(localStorage.getItem("items_dialogueSeen") || "false"),
         foundItems: JSON.parse(localStorage.getItem("foundItems") || "{}")
     }),
     getters: {
@@ -64,7 +64,7 @@ const useItemStore = defineStore("items", {
         },
         setDialogueSeen(value) {
             this.dialogueSeen = value;
-            localStorage.setItem("dialogueSeen", JSON.stringify(value));
+            localStorage.setItem("items_dialogueSeen", JSON.stringify(value));
         },
 
     }

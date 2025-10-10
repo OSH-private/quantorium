@@ -12,6 +12,7 @@ import P3 from "../pages/P3.vue";
 import P2 from "../pages/P2.vue";
 import garage from "../pages/garage.vue";
 import Politics from "../pages/Politics.vue";
+import Clear from "../pages/Clear.vue";
 const routes =
     [
         {
@@ -65,6 +66,10 @@ const routes =
         {
             path: '/comic',
             component: comic,
+        },
+        {
+            path: '/clear',
+            component: Clear,
         }
 
 
